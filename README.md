@@ -5,6 +5,9 @@
 # ACX Master
 ACX Master is a simple mastering tool designed to master and encode the final MP3 which an ACX audiobook narrator will upload to ACX in order to pass the ACX submission requirements with the least amount of headache possible.
 
+**Download the precompiled executables for your target operating system to get started:**  
+https://github.com/ScriptTiger/ACXMaster/releases
+
 # More About ScriptTiger
 
 For more ScriptTiger scripts and goodies, check out ScriptTiger's GitHub Pages website:  
