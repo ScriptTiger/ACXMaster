@@ -9,6 +9,7 @@ rem set JAVA_HOME=C:\path-to-JDK
 rem set PATH=%JAVA_HOME%\bin;%PATH%
 
 echo Set build information...
+set CNAME=ACX Master
 set PROJECT=ACX-Master
 set PACKAGE=acxmaster
 set ENTRY=Main
@@ -59,7 +60,7 @@ jlink.exe -p "Release\%JV%\%PROJECT%.jar;%JAVA_HOME%\jmods\windows" --add-module
 
 echo Build launcher for Windows...
 set GOOS=windows
-go build -ldflags="-s -w -H=windowsgui" -o "Release\%JV%\%PROJECT%_%PLATFORM%\%PROJECT%.exe" src\%PACKAGE%.go src\include_windows.go
+go build -ldflags="-s -w -H=windowsgui" -o "Release\%JV%\%PROJECT%_%PLATFORM%\%CNAME%.exe" src\%PACKAGE%.go src\include_windows.go
 
 echo Build app image for Linux...
 set PLATFORM=Linux_amd64
@@ -73,7 +74,7 @@ jlink.exe -p "Release\%JV%\%PROJECT%.jar;%JAVA_HOME%\jmods\linux" --add-modules 
 
 echo Build launcher for Linux...
 set GOOS=linux
-go build -ldflags="-s -w" -o "Release\%JV%\%PROJECT%_%PLATFORM%\%PROJECT%" src\%PACKAGE%.go src\include_other.go
+go build -ldflags="-s -w" -o "Release\%JV%\%PROJECT%_%PLATFORM%\%CNAME%" src\%PACKAGE%.go src\include_other.go
 
 echo Build app image for Mac...
 set PLATFORM=Mac_amd64
@@ -87,7 +88,7 @@ jlink.exe -p "Release\%JV%\%PROJECT%.jar;%JAVA_HOME%\jmods\mac" --add-modules %D
 
 echo Build launcher for Mac...
 set GOOS=darwin
-go build -ldflags="-s -w" -o "Release\%JV%\%PROJECT%_%PLATFORM%\%PROJECT%.app" src\%PACKAGE%.go src\include_other.go
+go build -ldflags="-s -w" -o "Release\%JV%\%PROJECT%_%PLATFORM%\%CNAME%.app" src\%PACKAGE%.go src\include_other.go
 
 echo Build complete
 pause
