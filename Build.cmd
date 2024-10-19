@@ -9,7 +9,7 @@ rem set JAVA_HOME=C:\path-to-JDK
 rem set PATH=%JAVA_HOME%\bin;%PATH%
 
 echo Set build information...
-set PROJECT=ACX Master
+set PROJECT=ACX-Master
 set PACKAGE=acxmaster
 set ENTRY=Main
 set DEPS=java.desktop
@@ -48,43 +48,46 @@ jar.exe uf "%PROJECT%.jar" module-info.class
 cd ..\..
 
 echo Build app image for Windows...
-jlink.exe -p "Release\%JV%\%PROJECT%.jar;%JAVA_HOME%\jmods\windows" --add-modules %DEPS%,%PACKAGE% --compress=zip-9 --no-header-files --no-man-pages --strip-debug --output "Release\%JV%\%PROJECT%-Windows"
+set PLATFORM=Windows_amd64
+jlink.exe -p "Release\%JV%\%PROJECT%.jar;%JAVA_HOME%\jmods\windows" --add-modules %DEPS%,%PACKAGE% --compress=zip-9 --no-header-files --no-man-pages --strip-debug --output "Release\%JV%\%PROJECT%_%PLATFORM%"
 (
-	copy README.md "Release\%JV%\%PROJECT%-Windows"
-	copy LICENSE "Release\%JV%\%PROJECT%-Windows"
-	copy bin\* "Release\%JV%\%PROJECT%-Windows\bin"
-	xcopy docs\* /s "Release\%JV%\%PROJECT%-Windows\legal"
+	copy README.md "Release\%JV%\%PROJECT%_%PLATFORM%"
+	copy LICENSE "Release\%JV%\%PROJECT%_%PLATFORM%"
+	copy bin\* "Release\%JV%\%PROJECT%_%PLATFORM%\bin"
+	xcopy docs\* /s "Release\%JV%\%PROJECT%_%PLATFORM%\legal"
 ) > nul
 
 echo Build launcher for Windows...
 set GOOS=windows
-go build -ldflags="-s -w -H=windowsgui" -o "Release\%JV%\%PROJECT%-Windows\%PROJECT%.exe" src\%PACKAGE%.go src\include_windows.go
+go build -ldflags="-s -w -H=windowsgui" -o "Release\%JV%\%PROJECT%_%PLATFORM%\%PROJECT%.exe" src\%PACKAGE%.go src\include_windows.go
 
 echo Build app image for Linux...
-jlink.exe -p "Release\%JV%\%PROJECT%.jar;%JAVA_HOME%\jmods\linux" --add-modules %DEPS%,%PACKAGE% --compress=zip-9 --no-header-files --no-man-pages --strip-debug --output "Release\%JV%\%PROJECT%-Linux"
+set PLATFORM=Linux_amd64
+jlink.exe -p "Release\%JV%\%PROJECT%.jar;%JAVA_HOME%\jmods\linux" --add-modules %DEPS%,%PACKAGE% --compress=zip-9 --no-header-files --no-man-pages --strip-debug --output "Release\%JV%\%PROJECT%_%PLATFORM%"
 (
-	copy README.md "Release\%JV%\%PROJECT%-Linux"
-	copy LICENSE "Release\%JV%\%PROJECT%-Linux"
-	copy bin\std.rnnn "Release\%JV%\%PROJECT%-Linux\bin"
-	xcopy docs\rnnoise /s "Release\%JV%\%PROJECT%-Linux\legal\rennoise\"
+	copy README.md "Release\%JV%\%PROJECT%_%PLATFORM%"
+	copy LICENSE "Release\%JV%\%PROJECT%_%PLATFORM%"
+	copy bin\std.rnnn "Release\%JV%\%PROJECT%_%PLATFORM%\bin"
+	xcopy docs\rnnoise /s "Release\%JV%\%PROJECT%_%PLATFORM%\legal\rennoise\"
 ) > nul
 
 echo Build launcher for Linux...
 set GOOS=linux
-go build -ldflags="-s -w" -o "Release\%JV%\%PROJECT%-Linux\%PROJECT%" src\%PACKAGE%.go src\include_other.go
+go build -ldflags="-s -w" -o "Release\%JV%\%PROJECT%_%PLATFORM%\%PROJECT%" src\%PACKAGE%.go src\include_other.go
 
 echo Build app image for Mac...
-jlink.exe -p "Release\%JV%\%PROJECT%.jar;%JAVA_HOME%\jmods\mac" --add-modules %DEPS%,%PACKAGE% --compress=zip-9 --no-header-files --no-man-pages --strip-debug --output "Release\%JV%\%PROJECT%-Mac"
+set PLATFORM=Mac_amd64
+jlink.exe -p "Release\%JV%\%PROJECT%.jar;%JAVA_HOME%\jmods\mac" --add-modules %DEPS%,%PACKAGE% --compress=zip-9 --no-header-files --no-man-pages --strip-debug --output "Release\%JV%\%PROJECT%_%PLATFORM%"
 (
-	copy README.md "Release\%JV%\%PROJECT%-Mac"
-	copy LICENSE "Release\%JV%\%PROJECT%-Mac"
-	copy bin\std.rnnn "Release\%JV%\%PROJECT%-Mac\bin"
-	xcopy docs\rnnoise /s "Release\%JV%\%PROJECT%-Mac\legal\rennoise\"
+	copy README.md "Release\%JV%\%PROJECT%_%PLATFORM%"
+	copy LICENSE "Release\%JV%\%PROJECT%_%PLATFORM%"
+	copy bin\std.rnnn "Release\%JV%\%PROJECT%_%PLATFORM%\bin"
+	xcopy docs\rnnoise /s "Release\%JV%\%PROJECT%_%PLATFORM%\legal\rennoise\"
 ) > nul
 
 echo Build launcher for Mac...
 set GOOS=darwin
-go build -ldflags="-s -w" -o "Release\%JV%\%PROJECT%-Mac\%PROJECT%.app" src\%PACKAGE%.go src\include_other.go
+go build -ldflags="-s -w" -o "Release\%JV%\%PROJECT%_%PLATFORM%\%PROJECT%.app" src\%PACKAGE%.go src\include_other.go
 
 echo Build complete
 pause
