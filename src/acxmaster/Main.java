@@ -643,7 +643,7 @@ public class Main extends JPanel {
 		add(gateCheckbox);
 
 		// Initialize buttons
-		JButton chooseButton = new JButton("Choose audio file...");
+		JButton chooseButton = new JButton("Choose audio files...");
 		JTextField fileChooserTextField = new JTextField();
 		JButton saveButton = new JButton("Save...");
 		JTextField saveChooserTextField = new JTextField();
