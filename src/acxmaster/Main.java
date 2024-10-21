@@ -645,7 +645,7 @@ public class Main extends JPanel {
 		// Initialize buttons
 		JButton chooseButton = new JButton("Choose audio file...");
 		JTextField fileChooserTextField = new JTextField();
-		JButton saveButton = new JButton("Save as...");
+		JButton saveButton = new JButton("Save...");
 		JTextField saveChooserTextField = new JTextField();
 		JButton masterButton = new JButton("Master!");
 		JLabel iiLabel = new JLabel("Integrated loudness:");
@@ -664,6 +664,37 @@ public class Main extends JPanel {
 		itpLabel.setBounds((W/6)*4, H-25-PAD, W/6, 25);
 		itpTextField.setBounds((W/6)*5, H-25-PAD, W/6, 25);
 
+		// Set up file chooser text field
+		fileChooserTextField.setEditable(false);
+		fileChooserTextField.setBackground(Color.WHITE);
+		add(fileChooserTextField);
+
+		// Set up file chooser
+		chooseButton.addActionListener(e -> {
+			JFileChooser fileChooser = null;
+			try {
+				UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+				fileChooser = new JFileChooser();
+				UIManager.setLookAndFeel(lookAndFeel);
+			} catch (Exception err) {};
+			fileChooser.setMultiSelectionEnabled(true);
+			fileChooser.showDialog(jFrame, "Choose audio files...");
+			master.setFiles(fileChooser.getSelectedFiles());
+			Integer fileCount = master.getFileCount();
+			if (fileCount == 0) {return;}
+			if (fileCount == 1) {
+				fileChooserTextField.setText(master.getFiles()[0].getPath());
+				saveButton.setText("Save as...");
+				master.setIsSingle(true);
+			} else {
+				fileChooserTextField.setText(String.valueOf(fileCount)+" files selected");
+				saveButton.setText("Save to...");
+				master.setIsSingle(false);
+			}
+			saveButton.setEnabled(true);
+		});
+		add(chooseButton);
+
 		// Set up save chooser text field
 		saveChooserTextField.setEditable(false);
 		saveChooserTextField.setBackground(Color.WHITE);
@@ -678,39 +709,29 @@ public class Main extends JPanel {
 				saveChooser = new JFileChooser();
 				UIManager.setLookAndFeel(lookAndFeel);
 			} catch (Exception err) {};
+			String saveButtonText;
+			if (master.isSingle()) {
+				FileNameExtensionFilter fileNameExtensionFilter = new FileNameExtensionFilter("MP3 File", "mp3");
+				saveChooser.addChoosableFileFilter(fileNameExtensionFilter);
+				saveButtonText = "Save as...";				
+			} else {
+				saveChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+				saveButtonText = "Save to...";
+			}
 			saveChooser.setAcceptAllFileFilterUsed(false);
-			FileNameExtensionFilter fileNameExtensionFilter = new FileNameExtensionFilter("MP3 File", "mp3");
-			saveChooser.addChoosableFileFilter(fileNameExtensionFilter);
-			saveChooser.showSaveDialog(jFrame);
-			String save = saveChooser.getSelectedFile().getPath();
-			if (!save.toLowerCase().endsWith(".mp3")) {save = save+".mp3";}
+			saveChooser.showDialog(jFrame, saveButtonText);
+			File save = saveChooser.getSelectedFile();
+			if (master.isSingle()) {
+				if (!save.getName().toLowerCase().endsWith(".mp3")) {
+					save = save.getParentFile().toPath().resolve(save.getName()+".mp3").toFile();
+				}
+			}
 			master.setSave(save);
-			saveChooserTextField.setText(save);
+			saveChooserTextField.setText(save.getPath());
 			masterButton.setEnabled(true);
 			masterButton.setText("Master!");
 		});
 		add(saveButton);
-
-		// Set up file chooser text field
-		fileChooserTextField.setEditable(false);
-		fileChooserTextField.setBackground(Color.WHITE);
-		add(fileChooserTextField);
-
-		// Set up file chooser
-		chooseButton.addActionListener(e -> {
-			JFileChooser fileChooser = null;
-			try {
-				UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-				fileChooser = new JFileChooser();
-				UIManager.setLookAndFeel(lookAndFeel);
-			} catch (Exception err) {};
-			fileChooser.showDialog(jFrame, "Choose audio file...");
-			String file = fileChooser.getSelectedFile().getPath();
-			master.setFile(file);
-			fileChooserTextField.setText(file);
-			saveButton.setEnabled(true);
-		});
-		add(chooseButton);
 
 		// Set up master button
 		masterButton.setEnabled(false);
@@ -718,25 +739,29 @@ public class Main extends JPanel {
 			masterButton.setEnabled(false);
 			chooseButton.setEnabled(false);
 			saveButton.setEnabled(false);
-			masterButton.setText("Analyzing source audio...");
 			new Thread(
 				new Runnable() {
 					public void run() {
-						if (master.analyze(false)) {
-							masterButton.setText("Mastering...");
-							master.master();
-							masterButton.setText("Analyzing mastered audio...");
-							master.analyze(true);
-							iiTextField.setText(master.getII()+" LUFS");
-							itpTextField.setText(master.getITP()+" dBTP");
-							masterButton.setText("Master complete!");
-						} else {masterButton.setText("An error occurred!");}
-						fileChooserTextField.setText("");
-						saveChooserTextField.setText("");
-						chooseButton.setEnabled(true);
+						if (master.check()) {
+							for (File file : master.getFiles()) {
+								masterButton.setText("Analyzing source audio...");
+								master.analyze(file);
+								masterButton.setText("Mastering...");
+								master.master(file);
+								masterButton.setText("Analyzing mastered audio...");
+								master.analyze(null);
+								iiTextField.setText(master.getII()+" LUFS");
+								itpTextField.setText(master.getITP()+" dBTP");
+							}
+							masterButton.setText("Mastering complete!");
+						} else {masterButton.setText("Ensure FFmpeg is installed in your path!");}
 					}
 				}
 			).start();
+			fileChooserTextField.setText("");
+			saveChooserTextField.setText("");
+			saveButton.setText("Save...");
+			chooseButton.setEnabled(true);
 		});
 		add(masterButton);
 
@@ -780,8 +805,10 @@ class Master {
 	//////////////////
 
 	// Files
-	private static String file = "";
-	private static String save = "";
+	private static File[] files;
+	private static Boolean isSingle;
+	private static File save;
+	private static String saveString;
 
 	// 18-band EQ
 	private static String oneBand = "0";
@@ -804,11 +831,11 @@ class Master {
 	private static String eighteenBand = "0";
 
 	// Loudnorm stats
-	private static String ii = "";
-	private static String itp = "";
-	private static String ilra = "";
-	private static String it = "";
-	private static String to = "";
+	private static String ii;
+	private static String itp;
+	private static String ilra;
+	private static String it;
+	private static String to;
 
 	// Additional filters
 	private static String rnnn = "";
@@ -819,6 +846,11 @@ class Master {
 	//////////
 	// Getters
 	//////////
+
+	// Files
+	public File[] getFiles() {return files;}
+	public Integer getFileCount() {return files.length;}
+	public Boolean isSingle() {return isSingle;}
 
 	// 18-band EQ
 	public String getOneBand() {return oneBand;}
@@ -855,8 +887,33 @@ class Master {
 	//////////
 
 	// Files
-	public void setFile(String file) {this.file = file;}
-	public void setSave(String save) {this.save = save;}
+	public void setFiles(File[] files) {this.files = files;}
+	public void setIsSingle(Boolean isSingle) {this.isSingle = isSingle;}
+	public void setSave(File save) {this.save = save;}
+	private void setSaveString(File file) {
+		if (isSingle) {
+			saveString = save.getPath();
+			return;
+		}
+		File saveFile;
+		String base;
+		String[] elements = file.getName().split("\\.");
+		Integer count = elements.length;
+		if (count > 1) {
+			StringBuilder stringBuilder = new StringBuilder();
+			for (int i = 0; i < count-1; i++) {
+				stringBuilder.append(elements[i]);
+				if (i+1 < count-1) {stringBuilder.append(".");}
+			}
+			base = stringBuilder.toString();
+		} else {base = file.getName();}
+		saveFile = save.toPath().resolve(base+".mp3").toFile();
+		for (int i = 2;; i++) {
+			if (!saveFile.exists()) {break;}
+			saveFile = save.toPath().resolve(base+" ("+String.valueOf(i)+").mp3").toFile();
+		}
+		saveString = saveFile.getPath();
+	}
 
 	// 18-band EQ
 	public void setOneBand(String gain) {oneBand = gain;}
@@ -900,17 +957,34 @@ class Master {
 	// Primary class functions
 	//////////////////////////
 
-	// Function to analyze file
-	public Boolean analyze(Boolean post) {
+	// Function to check ffmpeg
+	public Boolean check() {
 		Boolean err = true;
+		try {
+			Runtime runtime = Runtime.getRuntime();
+			String[] ffmpeg = {"ffmpeg", "-version"};
+			Process process = runtime.exec(ffmpeg);
+			process.waitFor();
+		} catch (Exception exception) {
+			new ErrorDialog(exception.getMessage());
+			err = false;
+		}
+		return err;
+	}
+
+	// Function to analyze files
+	public void analyze(File file) {
+		Boolean post = false;
+		if (file == null) {post = true;}
 		String filters = "";
 		String layout = "mono";
-		String file = "";
+		String fileString;
 		if (post) {
-			file = this.save;
+			fileString = saveString;
 			if (stereo) {layout = "stereo";}
 		} else {
-			file = this.file;
+			setSaveString(file);
+			fileString = file.getPath();
 			filters = rnnn+gate+declick+
 				"superequalizer="+
 				oneBand+"dB:"+
@@ -934,7 +1008,7 @@ class Master {
 		}
 		try {
 			Runtime runtime = Runtime.getRuntime();
-			String[] ffmpeg = {"ffmpeg", "-hide_banner", "-i", file, "-vn", "-sn", "-dn", "-af", "aformat=cl="+layout+","+filters+"loudnorm=print_format=summary", "-f", "null", ""};
+			String[] ffmpeg = {"ffmpeg", "-hide_banner", "-i", fileString, "-vn", "-sn", "-dn", "-af", "aformat=cl="+layout+","+filters+"loudnorm=print_format=summary", "-f", "null", ""};
 			Process process = runtime.exec(ffmpeg);
 			InputStream stderr = process.getErrorStream();
 			InputStreamReader stderrReader = new InputStreamReader(stderr);
@@ -948,15 +1022,12 @@ class Master {
 				if (line.startsWith("Target Offset:")) {to = line.split("\\s+")[2];}
 			}
 			process.waitFor();
-		} catch (Exception exception) {
-			new ErrorDialog(exception.getMessage());
-			err = false;
-		}
-		return err;
+		} catch (Exception exception) {}
 	}
 
-	// Function to master file
-	public void master() {
+	// Function to master files
+	public void master(File file) {
+		String fileString = file.getPath();
 		String filters = rnnn+gate+declick+
 			"superequalizer="+
 			oneBand+"dB:"+
@@ -981,7 +1052,7 @@ class Master {
 		if (stereo) {splitAndMerge = ",asplit,amerge";}
 		try {
 			Runtime runtime = Runtime.getRuntime();
-			String[] ffmpeg = {"ffmpeg", "-hide_banner", "-y", "-i", file, "-vn", "-sn", "-dn", "-filter_complex", "aformat=cl=mono,"+filters+"loudnorm=i=-20.0:tp=-3:measured_I="+ii+":measured_LRA="+ilra+":measured_tp="+itp+":measured_thresh="+it+":offset="+to+splitAndMerge, "-ar", "44.1k", "-ab", "192k", "-f", "mp3", save};
+			String[] ffmpeg = {"ffmpeg", "-hide_banner", "-y", "-i", fileString, "-vn", "-sn", "-dn", "-filter_complex", "aformat=cl=mono,"+filters+"loudnorm=i=-20.0:tp=-3:measured_I="+ii+":measured_LRA="+ilra+":measured_tp="+itp+":measured_thresh="+it+":offset="+to+splitAndMerge, "-ar", "44.1k", "-ab", "192k", "-f", "mp3", saveString};
 			Process process = runtime.exec(ffmpeg);
 			process.waitFor();
 		} catch (Exception exception) {}
