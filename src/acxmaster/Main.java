@@ -227,6 +227,9 @@ public class Main extends JPanel {
 				master.setIsSingle(false);
 			}
 			saveButton.setEnabled(true);
+			master.setSave(null);
+			saveChooserTextField.setText("");
+			masterButton.setEnabled(false);
 		});
 		add(chooseButton);
 
