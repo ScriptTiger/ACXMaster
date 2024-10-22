@@ -102,6 +102,15 @@ public class Main extends JPanel {
 					case "gate":
 						master.setGate(tokens[1]);
 						break;
+					case "i":
+						master.setI(tokens[1]);
+						break;
+					case "lra":
+						master.setLRA(tokens[1]);
+						break;
+					case "tp":
+						master.setTP(tokens[1]);
+						break;
 				}
 			}
 			reader.close();
@@ -115,6 +124,11 @@ public class Main extends JPanel {
 		// Set up settings menu
 		JMenu settings = new JMenu("Settings");
 		jMenuBar.add(settings);
+
+		// Set up Targets menu item
+		JMenuItem targetsItem = new JMenuItem("Targets");
+		targetsItem.addActionListener(e -> openTargetsDialog());
+		settings.add(targetsItem);
 
 		// Set up Save Settings menu item
 		JMenuItem saveSettingsItem = new JMenuItem("Save Settings");
@@ -143,7 +157,10 @@ public class Main extends JPanel {
 					"rnnn="+master.getRnnn()+"\n"+
 					"stereo="+String.valueOf(master.getStereo())+"\n"+
 					"declick="+master.getDeclick()+"\n"+
-					"gate="+master.getGate()
+					"gate="+master.getGate()+"\n"+
+					"i="+master.getI()+"\n"+
+					"lra="+master.getLRA()+"\n"+
+					"tp="+master.getTP()
 				);
 				writer.close();
 			} catch (Exception err) {}
@@ -543,75 +560,75 @@ public class Main extends JPanel {
 		// Set up slider text fields
 		oneTextField.setBackground(Color.WHITE);
 		oneTextField.setText(master.getOneBand());
-		oneTextField.addActionListener(e -> {oneSlider.setValue((int)Math.round(Double.valueOf(oneTextField.getText())));});
+		oneTextField.addActionListener(e -> {oneSlider.setValue((int)Math.round(Float.valueOf(oneTextField.getText())));});
 		add(oneTextField);
 		twoTextField.setBackground(Color.WHITE);
 		twoTextField.setText(master.getTwoBand());
-		twoTextField.addActionListener(e -> {twoSlider.setValue((int)Math.round(Double.valueOf(twoTextField.getText())));});
+		twoTextField.addActionListener(e -> {twoSlider.setValue((int)Math.round(Float.valueOf(twoTextField.getText())));});
 		add(twoTextField);
 		threeTextField.setBackground(Color.WHITE);
 		threeTextField.setText(master.getThreeBand());
-		threeTextField.addActionListener(e -> {threeSlider.setValue((int)Math.round(Double.valueOf(threeTextField.getText())));});
+		threeTextField.addActionListener(e -> {threeSlider.setValue((int)Math.round(Float.valueOf(threeTextField.getText())));});
 		add(threeTextField);
 		fourTextField.setBackground(Color.WHITE);
 		fourTextField.setText(master.getFourBand());
-		fourTextField.addActionListener(e -> {fourSlider.setValue((int)Math.round(Double.valueOf(fourTextField.getText())));});
+		fourTextField.addActionListener(e -> {fourSlider.setValue((int)Math.round(Float.valueOf(fourTextField.getText())));});
 		add(fourTextField);
 		fiveTextField.setBackground(Color.WHITE);
 		fiveTextField.setText(master.getFiveBand());
-		fiveTextField.addActionListener(e -> {fiveSlider.setValue((int)Math.round(Double.valueOf(fiveTextField.getText())));});
+		fiveTextField.addActionListener(e -> {fiveSlider.setValue((int)Math.round(Float.valueOf(fiveTextField.getText())));});
 		add(fiveTextField);
 		sixTextField.setBackground(Color.WHITE);
 		sixTextField.setText(master.getSixBand());
-		sixTextField.addActionListener(e -> {sixSlider.setValue((int)Math.round(Double.valueOf(sixTextField.getText())));});
+		sixTextField.addActionListener(e -> {sixSlider.setValue((int)Math.round(Float.valueOf(sixTextField.getText())));});
 		add(sixTextField);
 		sevenTextField.setBackground(Color.WHITE);
 		sevenTextField.setText(master.getSevenBand());
-		sevenTextField.addActionListener(e -> {sevenSlider.setValue((int)Math.round(Double.valueOf(sevenTextField.getText())));});
+		sevenTextField.addActionListener(e -> {sevenSlider.setValue((int)Math.round(Float.valueOf(sevenTextField.getText())));});
 		add(sevenTextField);
 		eightTextField.setBackground(Color.WHITE);
 		eightTextField.setText(master.getEightBand());
-		eightTextField.addActionListener(e -> {eightSlider.setValue((int)Math.round(Double.valueOf(eightTextField.getText())));});
+		eightTextField.addActionListener(e -> {eightSlider.setValue((int)Math.round(Float.valueOf(eightTextField.getText())));});
 		add(eightTextField);
 		nineTextField.setBackground(Color.WHITE);
 		nineTextField.setText(master.getNineBand());
-		nineTextField.addActionListener(e -> {nineSlider.setValue((int)Math.round(Double.valueOf(nineTextField.getText())));});
+		nineTextField.addActionListener(e -> {nineSlider.setValue((int)Math.round(Float.valueOf(nineTextField.getText())));});
 		add(nineTextField);
 		tenTextField.setBackground(Color.WHITE);
 		tenTextField.setText(master.getTenBand());
-		tenTextField.addActionListener(e -> {tenSlider.setValue((int)Math.round(Double.valueOf(tenTextField.getText())));});
+		tenTextField.addActionListener(e -> {tenSlider.setValue((int)Math.round(Float.valueOf(tenTextField.getText())));});
 		add(tenTextField);
 		elevenTextField.setBackground(Color.WHITE);
 		elevenTextField.setText(master.getElevenBand());
-		elevenTextField.addActionListener(e -> {elevenSlider.setValue((int)Math.round(Double.valueOf(elevenTextField.getText())));});
+		elevenTextField.addActionListener(e -> {elevenSlider.setValue((int)Math.round(Float.valueOf(elevenTextField.getText())));});
 		add(elevenTextField);
 		twelveTextField.setBackground(Color.WHITE);
 		twelveTextField.setText(master.getTwelveBand());
-		twelveTextField.addActionListener(e -> {twelveSlider.setValue((int)Math.round(Double.valueOf(twelveTextField.getText())));});
+		twelveTextField.addActionListener(e -> {twelveSlider.setValue((int)Math.round(Float.valueOf(twelveTextField.getText())));});
 		add(twelveTextField);
 		thirteenTextField.setBackground(Color.WHITE);
 		thirteenTextField.setText(master.getThirteenBand());
-		thirteenTextField.addActionListener(e -> {thirteenSlider.setValue((int)Math.round(Double.valueOf(thirteenTextField.getText())));});
+		thirteenTextField.addActionListener(e -> {thirteenSlider.setValue((int)Math.round(Float.valueOf(thirteenTextField.getText())));});
 		add(thirteenTextField);
 		fourteenTextField.setBackground(Color.WHITE);
 		fourteenTextField.setText(master.getFourteenBand());
-		fourteenTextField.addActionListener(e -> {fourteenSlider.setValue((int)Math.round(Double.valueOf(fourteenTextField.getText())));});
+		fourteenTextField.addActionListener(e -> {fourteenSlider.setValue((int)Math.round(Float.valueOf(fourteenTextField.getText())));});
 		add(fourteenTextField);
 		fifteenTextField.setBackground(Color.WHITE);
 		fifteenTextField.setText(master.getFifteenBand());
-		fifteenTextField.addActionListener(e -> {fifteenSlider.setValue((int)Math.round(Double.valueOf(fifteenTextField.getText())));});
+		fifteenTextField.addActionListener(e -> {fifteenSlider.setValue((int)Math.round(Float.valueOf(fifteenTextField.getText())));});
 		add(fifteenTextField);
 		sixteenTextField.setBackground(Color.WHITE);
 		sixteenTextField.setText(master.getSixteenBand());
-		sixteenTextField.addActionListener(e -> {sixteenSlider.setValue((int)Math.round(Double.valueOf(sixteenTextField.getText())));});
+		sixteenTextField.addActionListener(e -> {sixteenSlider.setValue((int)Math.round(Float.valueOf(sixteenTextField.getText())));});
 		add(sixteenTextField);
 		seventeenTextField.setBackground(Color.WHITE);
 		seventeenTextField.setText(master.getSeventeenBand());
-		seventeenTextField.addActionListener(e -> {seventeenSlider.setValue((int)Math.round(Double.valueOf(seventeenTextField.getText())));});
+		seventeenTextField.addActionListener(e -> {seventeenSlider.setValue((int)Math.round(Float.valueOf(seventeenTextField.getText())));});
 		add(seventeenTextField);
 		eighteenTextField.setBackground(Color.WHITE);
 		eighteenTextField.setText(master.getEighteenBand());
-		eighteenTextField.addActionListener(e -> {eighteenSlider.setValue((int)Math.round(Double.valueOf(eighteenTextField.getText())));});
+		eighteenTextField.addActionListener(e -> {eighteenSlider.setValue((int)Math.round(Float.valueOf(eighteenTextField.getText())));});
 		add(eighteenTextField);
 
 		// Noise suppression checkbox
@@ -680,7 +697,7 @@ public class Main extends JPanel {
 			fileChooser.setMultiSelectionEnabled(true);
 			fileChooser.showDialog(jFrame, "Choose audio files...");
 			master.setFiles(fileChooser.getSelectedFiles());
-			Integer fileCount = master.getFileCount();
+			int fileCount = master.getFileCount();
 			if (fileCount == 0) {return;}
 			if (fileCount == 1) {
 				fileChooserTextField.setText(master.getFiles()[0].getPath());
@@ -736,6 +753,7 @@ public class Main extends JPanel {
 		// Set up master button
 		masterButton.setEnabled(false);
 		masterButton.addActionListener(e -> {
+			masterButton.setText("Checking for dependencies...");
 			masterButton.setEnabled(false);
 			chooseButton.setEnabled(false);
 			saveButton.setEnabled(false);
@@ -780,6 +798,91 @@ public class Main extends JPanel {
 		itpTextField.setBackground(Color.WHITE);
 		itpTextField.setHorizontalAlignment(JLabel.CENTER);
 		add(itpTextField);
+	}
+
+	private void openTargetsDialog() {
+		final int W = 300;
+		final int H = 155;
+		final int PAD = 5;
+
+		// Set up the dialog window
+		JDialog targetsDialog = new JDialog(jFrame, "Targets", true);
+		targetsDialog.getContentPane().setPreferredSize(new Dimension(W, H));
+		targetsDialog.getContentPane().setLayout(null);
+
+		// Integrated loudness target label
+		JLabel iLabel = new JLabel("Integrated loudness target (LUFS):");
+		iLabel.setBounds(PAD, PAD, (W/4)*3-PAD, 25);
+		targetsDialog.add(iLabel);
+
+		// Integrated loudness target text field
+		JTextField iTextField = new JTextField(master.getI());
+		iTextField.setBounds((W/4)*3, PAD, (W/4)-PAD, 25);
+		targetsDialog.add(iTextField);
+
+		// Loudness range target label
+		JLabel lraLabel = new JLabel("Loudness range target (LU):");
+		lraLabel.setBounds(PAD, PAD*2+25, (W/4)*3-PAD, 25);
+		targetsDialog.add(lraLabel);
+
+		// Loudness range target text field
+		JTextField lraTextField = new JTextField(master.getLRA());
+		lraTextField.setBounds((W/4)*3, PAD*2+25, (W/4)-PAD, 25);
+		targetsDialog.add(lraTextField);
+
+		// Maximum true peak label
+		JLabel tpLabel = new JLabel("Maximum true peak (dBTP):");
+		tpLabel.setBounds(PAD, PAD+(PAD+25)*2, (W/4)*3-PAD, 25);
+		targetsDialog.add(tpLabel);
+
+		// Maximum true peak text field
+		JTextField tpTextField = new JTextField(master.getTP());
+		tpTextField.setBounds((W/4)*3, PAD+(PAD+25)*2, (W/4)-PAD, 25);
+		targetsDialog.add(tpTextField);
+
+		// Revert to defaults button
+		JButton defaults = new JButton("Revert to defaults");
+		defaults.setBounds(PAD, H-(25+PAD)*2, W-PAD*2, 25);
+		defaults.addActionListener(e -> {
+			iTextField.setText("-20.0");
+			lraTextField.setText("7.0");
+			tpTextField.setText("-3.0");
+		});
+		targetsDialog.add(defaults);
+
+		// Apply button
+		JButton apply = new JButton("Apply");
+		apply.setBounds(PAD, H-(25+PAD), W-PAD*2, 25);
+		apply.addActionListener(e -> {
+			float check;
+			check = Float.parseFloat(iTextField.getText());
+			if (check < -70 || check > -5) {
+				new ErrorDialog("Integrated loudness target must be between -70 LUFS and -5 LUFS!");
+				return;
+			}
+			check = Float.parseFloat(lraTextField.getText());
+			if (check < 1 || check > 50) {
+				new ErrorDialog("Loudness range target must be between 1 LU and 50 LU!");
+				return;
+			}
+			check = Float.parseFloat(tpTextField.getText());
+			if (check < -9 || check > 0) {
+				new ErrorDialog("Maximum true peak must be between -9 dBTP and 0 dBTP!");
+				return;
+			}
+			master.setI(iTextField.getText());
+			master.setLRA(lraTextField.getText());
+			master.setTP(tpTextField.getText());
+			targetsDialog.setVisible(false);
+			targetsDialog.dispose();
+		});
+		targetsDialog.add(apply);
+
+		// Finish setting up dialog window and show
+		targetsDialog.pack();
+		targetsDialog.setResizable(false);
+		targetsDialog.setLocationRelativeTo(null);
+		targetsDialog.setVisible(true);
 	}
 
 	public static void main(String[] args) {
@@ -830,12 +933,21 @@ class Master {
 	private static String seventeenBand = "0";
 	private static String eighteenBand = "0";
 
+	// Stream info
+	private static String duration;
+	private static String sampleRate;
+
 	// Loudnorm stats
 	private static String ii;
 	private static String itp;
 	private static String ilra;
 	private static String it;
 	private static String to;
+
+	// Loudnorm targets
+	private static String i = "-20.0";
+	private static String lra = "7.0";
+	private static String tp = "-3.0";
 
 	// Additional filters
 	private static String rnnn = "";
@@ -849,7 +961,7 @@ class Master {
 
 	// Files
 	public File[] getFiles() {return files;}
-	public Integer getFileCount() {return files.length;}
+	public int getFileCount() {return files.length;}
 	public Boolean isSingle() {return isSingle;}
 
 	// 18-band EQ
@@ -872,9 +984,18 @@ class Master {
 	public String getSeventeenBand() {return seventeenBand;}
 	public String getEighteenBand() {return eighteenBand;}
 
+	// Stream info
+	public String getDuration() {return duration;}
+	public String getSampleRate() {return sampleRate;}
+
 	// Loudnorm stats
 	public String getII() {return ii;}
 	public String getITP() {return itp;}
+
+	// Loudnorm targets
+	public String getI() {return i;}
+	public String getLRA() {return lra;}
+	public String getTP() {return tp;}
 
 	// Additional filters
 	public String getRnnn() {return rnnn;}
@@ -898,7 +1019,7 @@ class Master {
 		File saveFile;
 		String base;
 		String[] elements = file.getName().split("\\.");
-		Integer count = elements.length;
+		int count = elements.length;
 		if (count > 1) {
 			StringBuilder stringBuilder = new StringBuilder();
 			for (int i = 0; i < count-1; i++) {
@@ -934,6 +1055,11 @@ class Master {
 	public void setSixteenBand(String gain) {sixteenBand = gain;}
 	public void setSeventeenBand(String gain) {seventeenBand = gain;}
 	public void setEighteenBand(String gain) {eighteenBand = gain;}
+
+	// Loudnorm targets
+	public void setI(String i) {this.i = i;}
+	public void setLRA(String lra) {this.lra = lra;}
+	public void setTP(String tp) {this.tp = tp;}
 
 	// Additional filters
 	public void rnnn(Boolean enabled) {
@@ -984,6 +1110,7 @@ class Master {
 			if (stereo) {layout = "stereo";}
 		} else {
 			setSaveString(file);
+			sampleRate = null;
 			fileString = file.getPath();
 			filters = rnnn+gate+declick+
 				"superequalizer="+
@@ -1015,6 +1142,12 @@ class Master {
 			BufferedReader stderrBufferedReader = new BufferedReader(stderrReader);
 			String line = null;
 			while ((line = stderrBufferedReader.readLine()) != null) {
+				if (line.matches("^\\s+Duration:\\s\\d{2}:\\d{2}:\\d{2}\\.\\d{2},\\sstart:\\s.*")) {
+					duration = line.split("\\s+")[2].replace(",", "");
+				}
+				if (line.matches("^\\s+Stream\\s#\\d.*")&&!post&&sampleRate == null) {
+					sampleRate = line.split(",")[1].replace("Hz", "").trim();
+				}
 				if (line.startsWith("Input Integrated:")) {ii = line.split("\\s+")[2];}
 				if (line.startsWith("Input True Peak:")) {itp = line.split("\\s+")[3];}
 				if (line.startsWith("Input LRA:")) {ilra = line.split("\\s+")[2];}
@@ -1052,7 +1185,7 @@ class Master {
 		if (stereo) {splitAndMerge = ",asplit,amerge";}
 		try {
 			Runtime runtime = Runtime.getRuntime();
-			String[] ffmpeg = {"ffmpeg", "-hide_banner", "-y", "-i", fileString, "-vn", "-sn", "-dn", "-filter_complex", "aformat=cl=mono,"+filters+"loudnorm=i=-20.0:tp=-3:measured_I="+ii+":measured_LRA="+ilra+":measured_tp="+itp+":measured_thresh="+it+":offset="+to+splitAndMerge, "-ar", "44.1k", "-ab", "192k", "-f", "mp3", saveString};
+			String[] ffmpeg = {"ffmpeg", "-hide_banner", "-y", "-i", fileString, "-vn", "-sn", "-dn", "-filter_complex", "aformat=cl=mono,"+filters+"loudnorm=i="+i+":lra="+lra+":tp="+tp+":measured_I="+ii+":measured_LRA="+ilra+":measured_tp="+itp+":measured_thresh="+it+":offset="+to+splitAndMerge, "-ar", "44.1k", "-ab", "192k", "-f", "mp3", saveString};
 			Process process = runtime.exec(ffmpeg);
 			process.waitFor();
 		} catch (Exception exception) {}
