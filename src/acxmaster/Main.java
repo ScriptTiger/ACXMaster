@@ -103,13 +103,13 @@ public class Main extends JPanel {
 						master.setGate(tokens[1]);
 						break;
 					case "i":
-						master.setI(tokens[1]);
+						master.setI(Float.parseFloat(tokens[1]));
 						break;
 					case "lra":
-						master.setLRA(tokens[1]);
+						master.setLRA(Float.parseFloat(tokens[1]));
 						break;
 					case "tp":
-						master.setTP(tokens[1]);
+						master.setTP(Float.parseFloat(tokens[1]));
 						break;
 				}
 			}
@@ -168,9 +168,9 @@ public class Main extends JPanel {
 					"stereo="+String.valueOf(master.getStereo())+"\n"+
 					"declick="+master.getDeclick()+"\n"+
 					"gate="+master.getGate()+"\n"+
-					"i="+master.getI()+"\n"+
-					"lra="+master.getLRA()+"\n"+
-					"tp="+master.getTP()
+					"i="+String.valueOf(master.getI())+"\n"+
+					"lra="+String.valueOf(master.getLRA())+"\n"+
+					"tp="+String.valueOf(master.getTP())
 				);
 				writer.close();
 			} catch (Exception err) {}
@@ -285,12 +285,41 @@ public class Main extends JPanel {
 							for (File file : master.getFiles()) {
 								masterButton.setText("Analyzing source audio...");
 								master.analyze(file);
+
+								String warnings = "";
+								double rms = master.getRMS();
+								double otp = master.getOTP();
+								double floor = master.getFloor();
+								double duration = master.getDuration();
+								if (rms < -23 || rms > -18) {
+									warnings = warnings+
+									"Your RMS should be between -23 and -18, but yours will be "+String.valueOf(rms)+".\n";
+								}
+								if (otp < -6 || otp > -3) {
+									warnings = warnings+
+									"Your true peak should be between -6 and -3, but yours will be "+String.valueOf(otp)+".\n";
+								}
+								if (floor == 0) {
+									warnings = warnings+
+									"Your noise floor will be considered unnatural.\n";
+								}
+								if (duration > 7200) {
+									warnings = warnings+
+									"Your audio file will exceed the ACX duration limit of 120 minutes.\n";
+								}
+								if (!warnings.isEmpty()) {
+									warnings = "\""+file.getPath()+"\"\n\n"+warnings+
+									"\nWould you like to encode the audio file anyway?\n";
+									int choice = JOptionPane.showConfirmDialog(null, warnings, "Warning", JOptionPane.YES_NO_OPTION);
+									if(choice != JOptionPane.YES_OPTION){continue;};
+								}
+
 								masterButton.setText("Mastering...");
 								master.master(file);
 								masterButton.setText("Analyzing mastered audio...");
 								master.analyze(null);
-								iiTextField.setText(master.getII()+" LUFS / "+master.getRMS()+" dBRMS");
-								itpTextField.setText(master.getITP()+" dBTP");
+								iiTextField.setText(String.valueOf(master.getOI())+" LUFS / "+String.valueOf(master.getRMS())+" dBRMS");
+								itpTextField.setText(String.valueOf(master.getOTP())+" dBTP");
 							}
 							masterButton.setText("Mastering complete!");
 						} else {masterButton.setText("Ensure FFmpeg is installed in your path!");}
@@ -336,7 +365,7 @@ public class Main extends JPanel {
 		targetsDialog.add(iLabel);
 
 		// Integrated loudness target text field
-		JTextField iTextField = new JTextField(master.getI());
+		JTextField iTextField = new JTextField(String.valueOf(master.getI()));
 		iTextField.setBounds((W/4)*3, PAD, (W/4)-PAD, 25);
 		targetsDialog.add(iTextField);
 
@@ -346,7 +375,7 @@ public class Main extends JPanel {
 		targetsDialog.add(lraLabel);
 
 		// Loudness range target text field
-		JTextField lraTextField = new JTextField(master.getLRA());
+		JTextField lraTextField = new JTextField(String.valueOf(master.getLRA()));
 		lraTextField.setBounds((W/4)*3, PAD*2+25, (W/4)-PAD, 25);
 		targetsDialog.add(lraTextField);
 
@@ -356,7 +385,7 @@ public class Main extends JPanel {
 		targetsDialog.add(tpLabel);
 
 		// Maximum true peak text field
-		JTextField tpTextField = new JTextField(master.getTP());
+		JTextField tpTextField = new JTextField(String.valueOf(master.getTP()));
 		tpTextField.setBounds((W/4)*3, PAD+(PAD+25)*2, (W/4)-PAD, 25);
 		targetsDialog.add(tpTextField);
 
@@ -386,13 +415,13 @@ public class Main extends JPanel {
 				return;
 			}
 			check = Float.parseFloat(tpTextField.getText());
-			if (check < -9 || check > 0) {
-				new ErrorDialog("Maximum true peak must be between -9 dBTP and 0 dBTP!");
+			if (check < -6 || check > -3) {
+				new ErrorDialog("Maximum true peak must be between -6 dBTP and -3 dBTP!");
 				return;
 			}
-			master.setI(iTextField.getText());
-			master.setLRA(lraTextField.getText());
-			master.setTP(tpTextField.getText());
+			master.setI(Float.parseFloat(iTextField.getText()));
+			master.setLRA(Float.parseFloat(lraTextField.getText()));
+			master.setTP(Float.parseFloat(tpTextField.getText()));
 			targetsDialog.setVisible(false);
 			targetsDialog.dispose();
 		});

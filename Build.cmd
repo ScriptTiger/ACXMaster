@@ -8,6 +8,9 @@ rem The following environmental variables need to be set either system-wide, for
 rem set JAVA_HOME=C:\path-to-JDK
 rem set PATH=%JAVA_HOME%\bin;%PATH%
 
+choice /m "Dev build?"
+set DEV=%ERRORLEVEL%
+
 echo Set build information...
 set CNAME=ACX Master
 set PROJECT=ACX-Master
@@ -28,6 +31,8 @@ echo Archive package to jar file...
 cd Release\%JV%
 jar.exe cfe "%PROJECT%.jar" %PACKAGE%.%ENTRY% %PACKAGE%\*.class
 cd ..\..
+
+if %DEV% == 1 goto Exit
 
 echo Set Java version to build...
 set JV=21
@@ -89,6 +94,8 @@ jlink.exe -p "Release\%JV%\%PROJECT%.jar;%JAVA_HOME%\jmods\mac" --add-modules %D
 echo Build launcher for Mac...
 set GOOS=darwin
 go build -ldflags="-s -w" -o "Release\%JV%\%PROJECT%_%PLATFORM%\%CNAME%.app" src\%PACKAGE%.go src\include_other.go
+
+:Exit
 
 echo Build complete
 pause
