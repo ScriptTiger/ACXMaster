@@ -46,9 +46,12 @@ class Master {
 	private static double otp;
 	private static float oi;
 	private static double rms;
-	private static double floor;
+	private static String overallFloorString;
+	private static double overallFloor;
 	private static int sampleCount;
 	private static double duration;
+	private static String sampleFloorString;
+	private static float sampleFloor;
 
 	// Loudnorm targets
 	private static float i = -20;
@@ -96,8 +99,11 @@ class Master {
 	public float getOI() {return oi;}
 	public double getOTP() {return otp;}
 	public double getRMS() {return rms;}
-	public double getFloor() {return floor;}
+	public String getOverallFloorString() {return overallFloorString;}
+	public double getOverallFloor() {return overallFloor;}
 	public double getDuration() {return duration;}
+	public String getSampleFloorString() {return sampleFloorString;}
+	public float getSampleFloor() {return sampleFloor;}
 
 	// Loudnorm targets
 	public float getI() {return i;}
@@ -200,27 +206,40 @@ class Master {
 			BufferedReader stderrBufferedReader = new BufferedReader(stderrReader);
 			String line = null;
 			while ((line = stderrBufferedReader.readLine()) != null) {
+				if (line.startsWith("[Parsed_astats_")) {
+					String[] stat = line.split("] ")[1].split(": ");
+					switch (stat[0]) {
+						case "Peak level dB":
+							if (!post) {break;}
+							otp = Double.parseDouble(stat[1]);
+							break;
+						case "RMS level dB":
+							if (!post) {break;}
+							rms = Double.parseDouble(stat[1]);
+							break;
+						case "Noise floor dB":
+							if (!post) {break;}
+							overallFloor = 0;
+							overallFloorString = stat[1];
+							overallFloor = Double.parseDouble(stat[1]);
+							break;
+						case "Number of samples":
+							if (sampleCount > 0) {break;}
+							sampleCount = Integer.parseInt(stat[1]);
+							duration = (double)sampleCount/(double)sampleRate;
+							break;
+					}
+				}
 				if (post) {
-					if (line.startsWith("[Parsed_astats_")) {
+					if (line.startsWith("Input Integrated:")) {oi = Float.parseFloat(line.split("\\s+")[2]);}
+					if (line.startsWith("[Parsed_volumedetect_")) {
 						String[] stat = line.split("] ")[1].split(": ");
-						switch (stat[0]) {
-							case "Peak level dB":
-								otp = Double.parseDouble(stat[1]);
-								break;
-							case "RMS level dB":
-								rms = Double.parseDouble(stat[1]);
-								break;
-							case "Noise floor dB":
-								floor = 0;
-								floor = Double.parseDouble(stat[1]);
-								break;
-							case "Number of samples":
-								sampleCount = Integer.parseInt(stat[1]);
-								duration = (double)sampleCount/(double)44100;
-								break;
+						if (stat[0].equals("mean_volume")) {
+							sampleFloor = 0;
+							sampleFloorString = stat[1].split(" ")[0];
+							sampleFloor = Float.parseFloat(sampleFloorString);
 						}
 					}
-					if (line.startsWith("Input Integrated:")) {oi = Float.parseFloat(line.split("\\s+")[2]);}
 				} else {
 					if (sampleRate == 0&&line.matches("^\\s+Stream\\s#\\d.*")) {
 						sampleRate = Integer.parseInt(line.split(",")[1].replace("Hz", "").trim());
@@ -265,10 +284,11 @@ class Master {
 		if (post) {
 			fileString = saveString;
 			if (stereo) {layout = "stereo";}
-			filters = "asplit[loudnorm],astats=measure_perchannel=none;[loudnorm]";
+			filters = "";
 		} else {
 			setSaveString(file);
 			sampleRate = 0;
+			sampleCount = 0;
 			fileString = file.getPath();
 			filters = rnnn+gate+declick+
 				"superequalizer="+
@@ -291,12 +311,13 @@ class Master {
 				seventeenBand+"dB:"+
 				eighteenBand+"dB,";
 		}
-		String[] stats = {"ffmpeg", "-hide_banner", "-i", fileString, "-vn", "-sn", "-dn", "-filter_complex", "aformat=cl="+layout+","+filters+"loudnorm=print_format=summary", "-f", "null", ""};
+		String[] stats = {"ffmpeg", "-hide_banner", "-i", fileString, "-vn", "-sn", "-dn", "-filter_complex", "aformat=cl="+layout+","+filters+"asplit[loudnorm],astats=measure_perchannel=none;[loudnorm]loudnorm=print_format=summary", "-f", "null", ""};
 		ffmpeg(post, stats);
 		if (!post) {
 			String splitAndMerge = "";
 			if (stereo) {splitAndMerge = ",asplit,amerge";}
-			String[] predict = {"ffmpeg", "-hide_banner", "-y", "-i", fileString, "-vn", "-sn", "-dn", "-filter_complex", "aformat=cl=mono,"+filters+"loudnorm=i="+String.valueOf(i)+":lra="+String.valueOf(lra)+":tp="+String.valueOf(tp)+":measured_I="+String.valueOf(ii)+":measured_LRA="+String.valueOf(ilra)+":measured_tp="+itp+":measured_thresh="+String.valueOf(it)+":offset="+String.valueOf(to)+splitAndMerge+",asplit[loudnorm],astats=measure_perchannel=none;[loudnorm]loudnorm=print_format=summary", "-f", "null", ""};
+			int endSample = (int)(duration*(double)192000)-192000;
+			String[] predict = {"ffmpeg", "-hide_banner", "-y", "-i", fileString, "-vn", "-sn", "-dn", "-filter_complex", "aformat=cl=mono,"+filters+"loudnorm=i="+String.valueOf(i)+":lra="+String.valueOf(lra)+":tp="+String.valueOf(tp)+":measured_I="+String.valueOf(ii)+":measured_LRA="+String.valueOf(ilra)+":measured_tp="+itp+":measured_thresh="+String.valueOf(it)+":offset="+String.valueOf(to)+splitAndMerge+",asplit=4[endSample][astats][loudnorm],atrim=end_sample=192000[startSample];[endSample]atrim=start_sample="+String.valueOf(endSample)+",[startSample]concat=2:0:1,volumedetect;[astats]astats=measure_perchannel=none;[loudnorm]loudnorm=print_format=summary", "-f", "null", ""};
 			ffmpeg(true, predict);
 		}
 	}
@@ -328,7 +349,7 @@ class Master {
 		if (stereo) {splitAndMerge = ",asplit,amerge";}
 		try {
 			Runtime runtime = Runtime.getRuntime();
-			String[] ffmpeg = {"ffmpeg", "-hide_banner", "-y", "-i", fileString, "-vn", "-sn", "-dn", "-filter_complex", "aformat=cl=mono,"+filters+"loudnorm=i="+String.valueOf(i)+":lra="+String.valueOf(lra)+":tp="+String.valueOf(tp)+":measured_I="+String.valueOf(ii)+":measured_LRA="+String.valueOf(ilra)+":measured_tp="+itp+":measured_thresh="+String.valueOf(it)+":offset="+String.valueOf(to)+splitAndMerge, "-ar", "44.1k", "-ab", "192k", "-f", "mp3", saveString};
+			String[] ffmpeg = {"ffmpeg", "-hide_banner", "-y", "-i", fileString, "-vn", "-sn", "-dn", "-filter_complex", "aformat=cl=mono,"+filters+"loudnorm=i="+String.valueOf(i)+":lra="+String.valueOf(lra)+":tp="+String.valueOf(tp)+":measured_I="+String.valueOf(ii)+":measured_LRA="+String.valueOf(ilra)+":measured_tp="+itp+":measured_thresh="+String.valueOf(it)+":offset="+String.valueOf(to)+splitAndMerge, "-t", String.valueOf((float)duration), "-ar", "44.1k", "-ab", "192k", "-f", "mp3", saveString};
 			Process process = runtime.exec(ffmpeg);
 			process.waitFor();
 		} catch (Exception exception) {}

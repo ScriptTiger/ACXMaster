@@ -19,7 +19,7 @@ public class Main extends JPanel {
 	private Main() {
 
 		final int W = 400;
-		final int H = 240;
+		final int H = 270;
 		final int PAD = 5;
 
 		// Store current look and feel
@@ -187,6 +187,8 @@ public class Main extends JPanel {
 		JTextField iiTextField = new JTextField();
 		JLabel itpLabel = new JLabel("True peak:");
 		JTextField itpTextField = new JTextField();
+		JLabel floorLabel = new JLabel("Noise floor:");
+		JTextField floorTextField = new JTextField();
 
 		// Position buttons and text fields
 		chooseButton.setBounds(PAD, PAD+25, W-PAD*2, 25);
@@ -198,6 +200,8 @@ public class Main extends JPanel {
 		iiTextField.setBounds(W/2, (PAD+25)*6, (W/2)-PAD, 25);
 		itpLabel.setBounds(PAD, (PAD+25)*7, (W/2)-PAD, 25);
 		itpTextField.setBounds(W/2, (PAD+25)*7, (W/2)-PAD, 25);
+		floorLabel.setBounds(PAD, (PAD+25)*8, (W/2)-PAD, 25);
+		floorTextField.setBounds(W/2, (PAD+25)*8, (W/2)-PAD, 25);
 
 		// Set up file chooser text field
 		fileChooserTextField.setEditable(false);
@@ -289,23 +293,29 @@ public class Main extends JPanel {
 								String warnings = "";
 								double rms = master.getRMS();
 								double otp = master.getOTP();
-								double floor = master.getFloor();
+								double overallFloor = master.getOverallFloor();
+								float sampleFloor = master.getSampleFloor();
 								double duration = master.getDuration();
 								if (rms < -23 || rms > -18) {
 									warnings = warnings+
-									"Your RMS should be between -23 and -18, but yours will be "+String.valueOf(rms)+".\n";
+									"* Your dBRMS should be between -23 and -18, but yours will be "+String.valueOf(rms)+".\n";
 								}
 								if (otp < -6 || otp > -3) {
 									warnings = warnings+
-									"Your true peak should be between -6 and -3, but yours will be "+String.valueOf(otp)+".\n";
+									"* Your true peak should be between -6 dBTP and -3 dBTP, but yours will be "+String.valueOf(otp)+" dBTP.\n";
 								}
-								if (floor == 0) {
+								if (overallFloor == 0) {
 									warnings = warnings+
-									"Your noise floor will be considered unnatural.\n";
+									"* Your noise floor will be considered unnatural because it contains a value of "+master.getOverallFloorString()+".\n";
+								}
+								if (sampleFloor != 0 && (sampleFloor < -90 || sampleFloor > -60)) {
+									warnings = warnings+
+									"* ACX recommends at least 1 second of room tone, and no more than 5 seconds, at the start and end of every audio file\n"+
+									"with a noise floor greater than -90 dBRMS and less than -60 dBRMS, but yours will be "+master.getSampleFloorString()+" dBRMS.\n";
 								}
 								if (duration > 7200) {
 									warnings = warnings+
-									"Your audio file will exceed the ACX duration limit of 120 minutes.\n";
+									"* Your audio file will exceed the ACX duration limit of 120 minutes.\n";
 								}
 								if (!warnings.isEmpty()) {
 									warnings = "\""+file.getPath()+"\"\n\n"+warnings+
@@ -320,6 +330,7 @@ public class Main extends JPanel {
 								master.analyze(null);
 								iiTextField.setText(String.valueOf(master.getOI())+" LUFS / "+String.valueOf(master.getRMS())+" dBRMS");
 								itpTextField.setText(String.valueOf(master.getOTP())+" dBTP");
+								floorTextField.setText(master.getSampleFloorString()+" dBRMS");
 							}
 							masterButton.setText("Mastering complete!");
 						} else {masterButton.setText("Ensure FFmpeg is installed in your path!");}
@@ -336,6 +347,7 @@ public class Main extends JPanel {
 		// Add stats labels
 		add(iiLabel);
 		add(itpLabel);
+		add(floorLabel);
 
 		// Set up loudness text field
 		iiTextField.setEditable(false);
@@ -346,6 +358,11 @@ public class Main extends JPanel {
 		itpTextField.setEditable(false);
 		itpTextField.setBackground(Color.WHITE);
 		add(itpTextField);
+
+		// Set up noise floor text field
+		floorTextField.setEditable(false);
+		floorTextField.setBackground(Color.WHITE);
+		add(floorTextField);
 	}
 
 	private void openTargetsDialog() {
