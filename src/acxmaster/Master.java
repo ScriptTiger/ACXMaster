@@ -59,10 +59,12 @@ class Master {
 	private static float tp = -3;
 
 	// Additional filters
+	private static String chain = "";
 	private static String rnnn = "";
 	private static String gate = "";
 	private static String declick = "";
 	private static Boolean stereo = false;
+	private static Boolean noise = false;
 
 	//////////
 	// Getters
@@ -111,14 +113,26 @@ class Master {
 	public float getTP() {return tp;}
 
 	// Additional filters
+	public String getChain() {
+		if (chain.isEmpty()) {setChain();}
+		return chain;
+	}
 	public String getRnnn() {return rnnn;}
 	public String getGate() {return gate;}
 	public String getDeclick() {return declick;}
 	public Boolean getStereo() {return stereo;}
+	public Boolean getNoise() {return noise;}
 
 	//////////
 	// Setters
 	//////////
+
+	// Resets
+	public void nextBatch() {chain = "";}
+	public void nextFile() {
+		overallFloor = 0;
+		sampleFloor = 0;
+	}
 
 	// Files
 	public void setFiles(File[] files) {this.files = files;}
@@ -175,6 +189,31 @@ class Master {
 	public void setTP(float tp) {this.tp = tp;}
 
 	// Additional filters
+	private void setChain() {
+		chain = rnnn+gate+declick+
+			"superequalizer="+
+			oneBand+"dB:"+
+			twoBand+"dB:"+
+			threeBand+"dB:"+
+			fourBand+"dB:"+
+			fiveBand+"dB:"+
+			sixBand+"dB:"+
+			sevenBand+"dB:"+
+			eightBand+"dB:"+
+			nineBand+"dB:"+
+			tenBand+"dB:"+
+			elevenBand+"dB:"+
+			twelveBand+"dB:"+
+			thirteenBand+"dB:"+
+			fourteenBand+"dB:"+
+			fifteenBand+"dB:"+
+			sixteenBand+"dB:"+
+			seventeenBand+"dB:"+
+			eighteenBand+"dB";
+		if (noise) {
+			chain = chain+"[noise];anoisesrc=44100:-70dB:c=brown,[noise]amix=2:shortest,";
+		} else {chain = chain+",";}
+	}
 	public void rnnn(Boolean enabled) {
 		if (enabled) {rnnn = "arnndn=std.rnnn,";
 		} else {rnnn = "";}
@@ -191,6 +230,7 @@ class Master {
 	}
 	public void setDeclick(String declick) {this.declick = declick;}
 	public void setStereo(Boolean enabled) {stereo = enabled;}
+	public void setNoise(Boolean enabled) {noise = enabled;}
 
 	////////////////////
 	// Utility functions
@@ -278,46 +318,26 @@ class Master {
 	public void analyze(File file) {
 		Boolean post = false;
 		if (file == null) {post = true;}
-		String filters;
+		String tmpChain = "";
 		String layout = "mono";
 		String fileString;
 		if (post) {
 			fileString = saveString;
 			if (stereo) {layout = "stereo";}
-			filters = "";
 		} else {
 			setSaveString(file);
 			sampleRate = 0;
 			sampleCount = 0;
 			fileString = file.getPath();
-			filters = rnnn+gate+declick+
-				"superequalizer="+
-				oneBand+"dB:"+
-				twoBand+"dB:"+
-				threeBand+"dB:"+
-				fourBand+"dB:"+
-				fiveBand+"dB:"+
-				sixBand+"dB:"+
-				sevenBand+"dB:"+
-				eightBand+"dB:"+
-				nineBand+"dB:"+
-				tenBand+"dB:"+
-				elevenBand+"dB:"+
-				twelveBand+"dB:"+
-				thirteenBand+"dB:"+
-				fourteenBand+"dB:"+
-				fifteenBand+"dB:"+
-				sixteenBand+"dB:"+
-				seventeenBand+"dB:"+
-				eighteenBand+"dB,";
+			tmpChain = getChain();
 		}
-		String[] stats = {"ffmpeg", "-hide_banner", "-i", fileString, "-vn", "-sn", "-dn", "-filter_complex", "aformat=cl="+layout+","+filters+"asplit[loudnorm],astats=measure_perchannel=none;[loudnorm]loudnorm=print_format=summary", "-f", "null", ""};
+		String[] stats = {"ffmpeg", "-hide_banner", "-i", fileString, "-vn", "-sn", "-dn", "-filter_complex", "aformat=cl="+layout+","+tmpChain+"asplit[loudnorm],astats=measure_perchannel=none;[loudnorm]loudnorm=print_format=summary", "-f", "null", ""};
 		ffmpeg(post, stats);
 		if (!post) {
 			String splitAndMerge = "";
 			if (stereo) {splitAndMerge = ",asplit,amerge";}
 			int endSample = (int)(duration*(double)192000)-192000;
-			String[] predict = {"ffmpeg", "-hide_banner", "-y", "-i", fileString, "-vn", "-sn", "-dn", "-filter_complex", "aformat=cl=mono,"+filters+"loudnorm=i="+String.valueOf(i)+":lra="+String.valueOf(lra)+":tp="+String.valueOf(tp)+":measured_I="+String.valueOf(ii)+":measured_LRA="+String.valueOf(ilra)+":measured_tp="+itp+":measured_thresh="+String.valueOf(it)+":offset="+String.valueOf(to)+splitAndMerge+",asplit=4[endSample][astats][loudnorm],atrim=end_sample=192000[startSample];[endSample]atrim=start_sample="+String.valueOf(endSample)+",[startSample]concat=2:0:1,volumedetect;[astats]astats=measure_perchannel=none;[loudnorm]loudnorm=print_format=summary", "-f", "null", ""};
+			String[] predict = {"ffmpeg", "-hide_banner", "-y", "-i", fileString, "-vn", "-sn", "-dn", "-filter_complex", "aformat=cl=mono,"+tmpChain+"loudnorm=i="+String.valueOf(i)+":lra="+String.valueOf(lra)+":tp="+String.valueOf(tp)+":measured_I="+String.valueOf(ii)+":measured_LRA="+String.valueOf(ilra)+":measured_tp="+itp+":measured_thresh="+String.valueOf(it)+":offset="+String.valueOf(to)+splitAndMerge+",asplit=4[endSample][astats][loudnorm],atrim=end_sample=192000[startSample];[endSample]atrim=start_sample="+String.valueOf(endSample)+",[startSample]concat=2:0:1,volumedetect;[astats]astats=measure_perchannel=none;[loudnorm]loudnorm=print_format=summary", "-t", String.valueOf((float)duration), "-f", "null", ""};
 			ffmpeg(true, predict);
 		}
 	}
@@ -325,31 +345,11 @@ class Master {
 	// Function to master files
 	public void master(File file) {
 		String fileString = file.getPath();
-		String filters = rnnn+gate+declick+
-			"superequalizer="+
-			oneBand+"dB:"+
-			twoBand+"dB:"+
-			threeBand+"dB:"+
-			fourBand+"dB:"+
-			fiveBand+"dB:"+
-			sixBand+"dB:"+
-			sevenBand+"dB:"+
-			eightBand+"dB:"+
-			nineBand+"dB:"+
-			tenBand+"dB:"+
-			elevenBand+"dB:"+
-			twelveBand+"dB:"+
-			thirteenBand+"dB:"+
-			fourteenBand+"dB:"+
-			fifteenBand+"dB:"+
-			sixteenBand+"dB:"+
-			seventeenBand+"dB:"+
-			eighteenBand+"dB,";
 		String splitAndMerge = "";
 		if (stereo) {splitAndMerge = ",asplit,amerge";}
 		try {
 			Runtime runtime = Runtime.getRuntime();
-			String[] ffmpeg = {"ffmpeg", "-hide_banner", "-y", "-i", fileString, "-vn", "-sn", "-dn", "-filter_complex", "aformat=cl=mono,"+filters+"loudnorm=i="+String.valueOf(i)+":lra="+String.valueOf(lra)+":tp="+String.valueOf(tp)+":measured_I="+String.valueOf(ii)+":measured_LRA="+String.valueOf(ilra)+":measured_tp="+itp+":measured_thresh="+String.valueOf(it)+":offset="+String.valueOf(to)+splitAndMerge, "-t", String.valueOf((float)duration), "-ar", "44.1k", "-ab", "192k", "-f", "mp3", saveString};
+			String[] ffmpeg = {"ffmpeg", "-hide_banner", "-y", "-i", fileString, "-vn", "-sn", "-dn", "-filter_complex", "aformat=cl=mono,"+getChain()+"loudnorm=i="+String.valueOf(i)+":lra="+String.valueOf(lra)+":tp="+String.valueOf(tp)+":measured_I="+String.valueOf(ii)+":measured_LRA="+String.valueOf(ilra)+":measured_tp="+itp+":measured_thresh="+String.valueOf(it)+":offset="+String.valueOf(to)+splitAndMerge, "-t", String.valueOf((float)duration), "-ar", "44.1k", "-ab", "192k", "-f", "mp3", saveString};
 			Process process = runtime.exec(ffmpeg);
 			process.waitFor();
 		} catch (Exception exception) {}

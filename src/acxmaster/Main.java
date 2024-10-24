@@ -102,6 +102,9 @@ public class Main extends JPanel {
 					case "gate":
 						master.setGate(tokens[1]);
 						break;
+					case "noise":
+						master.setNoise(Boolean.parseBoolean(tokens[1]));
+						break;
 					case "i":
 						master.setI(Float.parseFloat(tokens[1]));
 						break;
@@ -168,6 +171,7 @@ public class Main extends JPanel {
 					"stereo="+String.valueOf(master.getStereo())+"\n"+
 					"declick="+master.getDeclick()+"\n"+
 					"gate="+master.getGate()+"\n"+
+					"noise="+String.valueOf(master.getNoise())+"\n"+
 					"i="+String.valueOf(master.getI())+"\n"+
 					"lra="+String.valueOf(master.getLRA())+"\n"+
 					"tp="+String.valueOf(master.getTP())
@@ -282,12 +286,14 @@ public class Main extends JPanel {
 			masterButton.setEnabled(false);
 			chooseButton.setEnabled(false);
 			saveButton.setEnabled(false);
+			master.nextBatch();
 			new Thread(
 				new Runnable() {
 					public void run() {
 						if (master.check()) {
 							for (File file : master.getFiles()) {
 								masterButton.setText("Analyzing source audio...");
+								master.nextFile();
 								master.analyze(file);
 
 								String warnings = "";
@@ -936,7 +942,7 @@ public class Main extends JPanel {
 	private void openOptionsDialog() {
 
 		final int W = 275;
-		final int H = 60;
+		final int H = 90;
 		final int PAD = 5;
 
 		// Set up the dialog window
@@ -944,33 +950,40 @@ public class Main extends JPanel {
 		optionsDialog.getContentPane().setPreferredSize(new Dimension(W, H));
 		optionsDialog.getContentPane().setLayout(null);
 
-		// Noise suppression checkbox
-		JCheckBox rnnnCheckbox = new JCheckBox("Noise suppression");
+		// Supress noise checkbox
+		JCheckBox rnnnCheckbox = new JCheckBox("Supress noise");
 		rnnnCheckbox.setBounds(PAD, PAD, (W/2)-PAD, 25);
 		if (!master.getRnnn().isEmpty()) {rnnnCheckbox.setSelected(true);}
 		rnnnCheckbox.addActionListener(e -> {master.rnnn(rnnnCheckbox.isSelected());});
 		optionsDialog.add(rnnnCheckbox);
 
-		// Stereo checkbox
-		JCheckBox stereoCheckbox = new JCheckBox("Stereo");
+		// Output in stereo checkbox
+		JCheckBox stereoCheckbox = new JCheckBox("Output in stereo");
 		stereoCheckbox.setBounds(W/2, PAD, (W/2)-PAD, 25);
 		if (master.getStereo()) {stereoCheckbox.setSelected(true);}
 		stereoCheckbox.addActionListener(e -> {master.setStereo(stereoCheckbox.isSelected());});
 		optionsDialog.add(stereoCheckbox);
 
-		// Declick checkbox
-		JCheckBox declickCheckbox = new JCheckBox("Declick");
+		// De-click checkbox
+		JCheckBox declickCheckbox = new JCheckBox("De-click");
 		declickCheckbox.setBounds(PAD, PAD+25, (W/2)-PAD, 25);
 		if (!master.getDeclick().isEmpty()) {declickCheckbox.setSelected(true);}
 		declickCheckbox.addActionListener(e -> {master.declick(declickCheckbox.isSelected());});
 		optionsDialog.add(declickCheckbox);
 
-		// Gate checkbox
+		// Noise gate checkbox
 		JCheckBox gateCheckbox = new JCheckBox("Noise gate");
 		gateCheckbox.setBounds(W/2, PAD+25, (W/2)-PAD, 25);
 		if (!master.getGate().isEmpty()) {gateCheckbox.setSelected(true);}
 		gateCheckbox.addActionListener(e -> {master.gate(gateCheckbox.isSelected());});
 		optionsDialog.add(gateCheckbox);
+
+		// Generate noise checkbox
+		JCheckBox noiseCheckbox = new JCheckBox("Generate noise");
+		noiseCheckbox.setBounds(PAD, (PAD+25)*2, (W/2)-PAD, 25);
+		if (master.getNoise()) {noiseCheckbox.setSelected(true);}
+		noiseCheckbox.addActionListener(e -> {master.setNoise(noiseCheckbox.isSelected());});
+		optionsDialog.add(noiseCheckbox);
 
 		// Finish setting up dialog window and show
 		optionsDialog.pack();
