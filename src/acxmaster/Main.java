@@ -951,7 +951,7 @@ public class Main extends JPanel {
 
 	private void openOptionsDialog() {
 
-		final int W = 275;
+		final int W = 285;
 		final int H = 90;
 		final int PAD = 5;
 
