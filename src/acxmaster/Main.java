@@ -103,7 +103,13 @@ public class Main extends JPanel {
 						master.setGate(tokens[1]);
 						break;
 					case "noise":
-						master.setNoise(Boolean.parseBoolean(tokens[1]));
+						master.setNoise(tokens[1]);
+						break;
+					case "nowarn":
+						master.setNoWarn(Boolean.parseBoolean(tokens[1]));
+						break;
+					case "custom":
+						master.setCustom(tokens[1]);
 						break;
 					case "i":
 						master.setI(Float.parseFloat(tokens[1]));
@@ -171,7 +177,9 @@ public class Main extends JPanel {
 					"stereo="+String.valueOf(master.getStereo())+"\n"+
 					"declick="+master.getDeclick()+"\n"+
 					"gate="+master.getGate()+"\n"+
-					"noise="+String.valueOf(master.getNoise())+"\n"+
+					"noise="+master.getNoise()+"\n"+
+					"nowarn="+String.valueOf(master.getNoWarn())+"\n"+
+					"custom="+master.getCustom()+"\n"+
 					"i="+String.valueOf(master.getI())+"\n"+
 					"lra="+String.valueOf(master.getLRA())+"\n"+
 					"tp="+String.valueOf(master.getTP())
@@ -296,38 +304,40 @@ public class Main extends JPanel {
 								master.nextFile();
 								master.analyze(file);
 
-								String warnings = "";
-								double rms = master.getRMS();
-								double otp = master.getOTP();
-								double overallFloor = master.getOverallFloor();
-								float sampleFloor = master.getSampleFloor();
-								double duration = master.getDuration();
-								if (rms < -23 || rms > -18) {
-									warnings = warnings+
-									"* Your dBRMS should be between -23 and -18, but yours will be "+String.valueOf(rms)+".\n";
-								}
-								if (otp < -6 || otp > -3) {
-									warnings = warnings+
-									"* Your true peak should be between -6 dBTP and -3 dBTP, but yours will be "+String.valueOf(otp)+" dBTP.\n";
-								}
-								if (overallFloor == 0) {
-									warnings = warnings+
-									"* Your noise floor will be considered unnatural because it contains a value of "+master.getOverallFloorString()+".\n";
-								}
-								if (sampleFloor != 0 && (sampleFloor < -90 || sampleFloor > -60)) {
-									warnings = warnings+
-									"* ACX recommends at least 1 second of room tone, and no more than 5 seconds, at the start and end of every audio file\n"+
-									"with a noise floor greater than -90 dBRMS and less than -60 dBRMS, but yours will be "+master.getSampleFloorString()+" dBRMS.\n";
-								}
-								if (duration > 7200) {
-									warnings = warnings+
-									"* Your audio file will exceed the ACX duration limit of 120 minutes.\n";
-								}
-								if (!warnings.isEmpty()) {
-									warnings = "\""+file.getPath()+"\"\n\n"+warnings+
-									"\nWould you like to encode the audio file anyway?\n";
-									int choice = JOptionPane.showConfirmDialog(null, warnings, "Warning", JOptionPane.YES_NO_OPTION);
-									if(choice != JOptionPane.YES_OPTION){continue;};
+								if (!master.getNoWarn()) {
+									String warnings = "";
+									double rms = master.getRMS();
+									double otp = master.getOTP();
+									double overallFloor = master.getOverallFloor();
+									float sampleFloor = master.getSampleFloor();
+									double duration = master.getDuration();
+									if (rms < -23 || rms > -18) {
+										warnings = warnings+
+										"* Your dBRMS should be between -23 and -18, but yours will be "+String.valueOf(rms)+".\n";
+									}
+									if (otp < -6 || otp > -3) {
+										warnings = warnings+
+										"* Your true peak should be between -6 dBTP and -3 dBTP, but yours will be "+String.valueOf(otp)+" dBTP.\n";
+									}
+									if (overallFloor == 0) {
+										warnings = warnings+
+										"* Your noise floor will be considered unnatural because it contains a value of "+master.getOverallFloorString()+".\n";
+									}
+									if (sampleFloor != 0 && (sampleFloor < -90 || sampleFloor > -60)) {
+										warnings = warnings+
+										"* ACX recommends at least 1 second of room tone, and no more than 5 seconds, at the start and end of every audio file\n"+
+										"with a noise floor greater than -90 dBRMS and less than -60 dBRMS, but yours will be "+master.getSampleFloorString()+" dBRMS.\n";
+									}
+									if (duration > 7200) {
+										warnings = warnings+
+										"* Your audio file will exceed the ACX duration limit of 120 minutes.\n";
+									}
+									if (!warnings.isEmpty()) {
+										warnings = "\""+file.getPath()+"\"\n\n"+warnings+
+										"\nWould you like to encode the audio file anyway?\n";
+										int choice = JOptionPane.showConfirmDialog(null, warnings, "Warning", JOptionPane.YES_NO_OPTION);
+										if(choice != JOptionPane.YES_OPTION){continue;};
+									}
 								}
 
 								masterButton.setText("Mastering...");
@@ -950,8 +960,8 @@ public class Main extends JPanel {
 		optionsDialog.getContentPane().setPreferredSize(new Dimension(W, H));
 		optionsDialog.getContentPane().setLayout(null);
 
-		// Supress noise checkbox
-		JCheckBox rnnnCheckbox = new JCheckBox("Supress noise");
+		// Suppress noise checkbox
+		JCheckBox rnnnCheckbox = new JCheckBox("Suppress noise");
 		rnnnCheckbox.setBounds(PAD, PAD, (W/2)-PAD, 25);
 		if (!master.getRnnn().isEmpty()) {rnnnCheckbox.setSelected(true);}
 		rnnnCheckbox.addActionListener(e -> {master.rnnn(rnnnCheckbox.isSelected());});
@@ -981,9 +991,16 @@ public class Main extends JPanel {
 		// Generate noise checkbox
 		JCheckBox noiseCheckbox = new JCheckBox("Generate noise");
 		noiseCheckbox.setBounds(PAD, (PAD+25)*2, (W/2)-PAD, 25);
-		if (master.getNoise()) {noiseCheckbox.setSelected(true);}
-		noiseCheckbox.addActionListener(e -> {master.setNoise(noiseCheckbox.isSelected());});
+		if (!master.getNoise().isEmpty()) {noiseCheckbox.setSelected(true);}
+		noiseCheckbox.addActionListener(e -> {master.noise(noiseCheckbox.isSelected());});
 		optionsDialog.add(noiseCheckbox);
+
+		// Suppress warnings checkbox
+		JCheckBox noWarnCheckbox = new JCheckBox("Suppress warnings");
+		noWarnCheckbox.setBounds(W/2, (PAD+25)*2, (W/2)-PAD, 25);
+		if (master.getNoWarn()) {noWarnCheckbox.setSelected(true);}
+		noWarnCheckbox.addActionListener(e -> {master.setNoWarn(noWarnCheckbox.isSelected());});
+		optionsDialog.add(noWarnCheckbox);
 
 		// Finish setting up dialog window and show
 		optionsDialog.pack();

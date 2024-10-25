@@ -64,7 +64,9 @@ class Master {
 	private static String gate = "";
 	private static String declick = "";
 	private static Boolean stereo = false;
-	private static Boolean noise = false;
+	private static String noise = "";
+	private static Boolean noWarn = false;
+	private static String custom = "";
 
 	//////////
 	// Getters
@@ -121,7 +123,9 @@ class Master {
 	public String getGate() {return gate;}
 	public String getDeclick() {return declick;}
 	public Boolean getStereo() {return stereo;}
-	public Boolean getNoise() {return noise;}
+	public String getNoise() {return noise;}
+	public Boolean getNoWarn() {return noWarn;}
+	public String getCustom() {return custom;}
 
 	//////////
 	// Setters
@@ -190,7 +194,7 @@ class Master {
 
 	// Additional filters
 	private void setChain() {
-		chain = rnnn+gate+declick+
+		chain = rnnn+gate+custom+declick+
 			"superequalizer="+
 			oneBand+"dB:"+
 			twoBand+"dB:"+
@@ -210,8 +214,8 @@ class Master {
 			sixteenBand+"dB:"+
 			seventeenBand+"dB:"+
 			eighteenBand+"dB";
-		if (noise) {
-			chain = chain+"[noise];anoisesrc=44100:-70dB:c=brown,[noise]amix=2:shortest,";
+		if (!noise.isEmpty()) {
+			chain = chain+"[noise];"+noise+"[noise]amix=2:shortest,";
 		} else {chain = chain+",";}
 	}
 	public void rnnn(Boolean enabled) {
@@ -230,7 +234,13 @@ class Master {
 	}
 	public void setDeclick(String declick) {this.declick = declick;}
 	public void setStereo(Boolean enabled) {stereo = enabled;}
-	public void setNoise(Boolean enabled) {noise = enabled;}
+	public void noise(Boolean enabled) {
+		if (enabled) {noise = "anoisesrc=44100:-70dB:c=brown,";
+		} else {noise = "";}
+	}
+	public void setNoise(String noise) {this.noise = noise;}
+	public void setNoWarn(Boolean enabled) {noWarn = enabled;}
+	public void setCustom(String custom) {this.custom = custom;}
 
 	////////////////////
 	// Utility functions
