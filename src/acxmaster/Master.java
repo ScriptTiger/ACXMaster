@@ -13,8 +13,8 @@ class Master {
 	// Files
 	private static File[] files;
 	private static Boolean isSingle;
-	private static File save;
-	private static String saveString;
+	private static File saveFile;
+	private static String saveFileString;
 
 	// 18-band EQ
 	private static String oneBand = "0";
@@ -143,13 +143,13 @@ class Master {
 	// Files
 	public void setFiles(File[] files) {this.files = files;}
 	public void setIsSingle(Boolean isSingle) {this.isSingle = isSingle;}
-	public void setSave(File save) {this.save = save;}
-	private void setSaveString(File file) {
+	public void setSaveFile(File saveFile) {this.saveFile = saveFile;}
+	private void setSaveFileString(File file) {
 		if (isSingle) {
-			saveString = save.getPath();
+			saveFileString = saveFile.getPath();
 			return;
 		}
-		File saveFile;
+		File tmpSaveFile;
 		String base;
 		String[] elements = file.getName().split("\\.");
 		int count = elements.length;
@@ -161,12 +161,12 @@ class Master {
 			}
 			base = stringBuilder.toString();
 		} else {base = file.getName();}
-		saveFile = save.toPath().resolve(base+".mp3").toFile();
+		tmpSaveFile = saveFile.toPath().resolve(base+".mp3").toFile();
 		for (int i = 2;; i++) {
-			if (!saveFile.exists()) {break;}
-			saveFile = save.toPath().resolve(base+" ("+String.valueOf(i)+").mp3").toFile();
+			if (!tmpSaveFile.exists()) {break;}
+			tmpSaveFile = saveFile.toPath().resolve(base+" ("+String.valueOf(i)+").mp3").toFile();
 		}
-		saveString = saveFile.getPath();
+		saveFileString = tmpSaveFile.getPath();
 	}
 
 	// 18-band EQ
@@ -334,10 +334,10 @@ class Master {
 		String layout = "mono";
 		String fileString;
 		if (post) {
-			fileString = saveString;
+			fileString = saveFileString;
 			if (stereo) {layout = "stereo";}
 		} else {
-			setSaveString(file);
+			setSaveFileString(file);
 			sampleRate = 0;
 			sampleCount = 0;
 			fileString = file.getPath();
@@ -349,7 +349,7 @@ class Master {
 			String splitAndMerge = "";
 			if (stereo) {splitAndMerge = ",asplit,amerge";}
 			int endSample = (int)(duration*(double)192000)-192000;
-			String[] predict = {"ffmpeg", "-hide_banner", "-y", "-i", fileString, "-vn", "-sn", "-dn", "-filter_complex", "aformat=cl=mono,"+tmpChain+"loudnorm=i="+String.valueOf(i)+":lra="+String.valueOf(lra)+":tp="+String.valueOf(tp)+":measured_I="+String.valueOf(ii)+":measured_LRA="+String.valueOf(ilra)+":measured_tp="+itp+":measured_thresh="+String.valueOf(it)+":offset="+String.valueOf(to)+splitAndMerge+",asplit=4[endSample][astats][loudnorm],atrim=end_sample=192000[startSample];[endSample]atrim=start_sample="+String.valueOf(endSample)+",[startSample]concat=2:0:1,volumedetect;[astats]astats=measure_perchannel=none;[loudnorm]loudnorm=print_format=summary", "-t", String.valueOf((float)duration), "-f", "null", ""};
+			String[] predict = {"ffmpeg", "-hide_banner", "-y", "-i", fileString, "-vn", "-sn", "-dn", "-filter_complex", "aformat=cl=mono,"+tmpChain+"loudnorm=i="+String.valueOf(i)+":lra="+String.valueOf(lra)+":tp="+String.valueOf(tp)+":measured_I="+String.valueOf(ii)+":measured_LRA="+String.valueOf(ilra)+":measured_tp="+String.valueOf(itp)+":measured_thresh="+String.valueOf(it)+":offset="+String.valueOf(to)+splitAndMerge+",asplit=4[endSample][astats][loudnorm],atrim=end_sample=192000[startSample];[endSample]atrim=start_sample="+String.valueOf(endSample)+",[startSample]concat=2:0:1,volumedetect;[astats]astats=measure_perchannel=none;[loudnorm]loudnorm=print_format=summary", "-t", String.valueOf((float)duration), "-f", "null", ""};
 			ffmpeg(true, predict);
 		}
 	}
@@ -361,7 +361,7 @@ class Master {
 		if (stereo) {splitAndMerge = ",asplit,amerge";}
 		try {
 			Runtime runtime = Runtime.getRuntime();
-			String[] ffmpeg = {"ffmpeg", "-hide_banner", "-y", "-i", fileString, "-vn", "-sn", "-dn", "-filter_complex", "aformat=cl=mono,"+getChain()+"loudnorm=i="+String.valueOf(i)+":lra="+String.valueOf(lra)+":tp="+String.valueOf(tp)+":measured_I="+String.valueOf(ii)+":measured_LRA="+String.valueOf(ilra)+":measured_tp="+itp+":measured_thresh="+String.valueOf(it)+":offset="+String.valueOf(to)+splitAndMerge, "-t", String.valueOf((float)duration), "-ar", "44.1k", "-ab", "192k", "-f", "mp3", saveString};
+			String[] ffmpeg = {"ffmpeg", "-hide_banner", "-y", "-i", fileString, "-vn", "-sn", "-dn", "-filter_complex", "aformat=cl=mono,"+getChain()+"loudnorm=i="+String.valueOf(i)+":lra="+String.valueOf(lra)+":tp="+String.valueOf(tp)+":measured_I="+String.valueOf(ii)+":measured_LRA="+String.valueOf(ilra)+":measured_tp="+String.valueOf(itp)+":measured_thresh="+String.valueOf(it)+":offset="+String.valueOf(to)+splitAndMerge, "-t", String.valueOf((float)duration), "-ar", "44.1k", "-ab", "192k", "-f", "mp3", saveFileString};
 			Process process = runtime.exec(ffmpeg);
 			process.waitFor();
 		} catch (Exception exception) {}

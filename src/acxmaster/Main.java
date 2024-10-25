@@ -243,7 +243,7 @@ public class Main extends JPanel {
 				master.setIsSingle(false);
 			}
 			saveButton.setEnabled(true);
-			master.setSave(null);
+			master.setSaveFile(null);
 			saveChooserTextField.setText("");
 			masterButton.setEnabled(false);
 		});
@@ -274,14 +274,14 @@ public class Main extends JPanel {
 			}
 			saveChooser.setAcceptAllFileFilterUsed(false);
 			saveChooser.showDialog(jFrame, saveButtonText);
-			File save = saveChooser.getSelectedFile();
+			File saveFile = saveChooser.getSelectedFile();
 			if (master.isSingle()) {
-				if (!save.getName().toLowerCase().endsWith(".mp3")) {
-					save = save.getParentFile().toPath().resolve(save.getName()+".mp3").toFile();
+				if (!saveFile.getName().toLowerCase().endsWith(".mp3")) {
+					saveFile = saveFile.getParentFile().toPath().resolve(saveFile.getName()+".mp3").toFile();
 				}
 			}
-			master.setSave(save);
-			saveChooserTextField.setText(save.getPath());
+			master.setSaveFile(saveFile);
+			saveChooserTextField.setText(saveFile.getPath());
 			masterButton.setEnabled(true);
 			masterButton.setText("Master!");
 		});
