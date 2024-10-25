@@ -135,7 +135,9 @@ class Master {
 	public void nextBatch() {chain = "";}
 	public void nextFile() {
 		overallFloor = 0;
+		overallFloorString = null;
 		sampleFloor = 0;
+		sampleFloorString = null;
 	}
 
 	// Files
