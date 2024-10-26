@@ -1,6 +1,6 @@
 package acxmaster;
 
-// Main standard swing deps
+// Standard swing deps
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
