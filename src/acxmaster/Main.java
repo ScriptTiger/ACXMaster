@@ -309,16 +309,16 @@ public class Main extends JPanel {
 						if (master.check()) {
 							for (File file : master.getFiles()) {
 								masterButton.setText("Analyzing source audio...");
-								master.nextFile();
 								master.analyze(file);
+								AudioInfo audioInfo = master.getAudioInfo();
 
 								if (!options.getNoWarn()) {
 									String warnings = "";
-									double rms = master.getRMS();
-									double otp = master.getOTP();
-									double overallFloor = master.getOverallFloor();
-									float sampleFloor = master.getSampleFloor();
-									double duration = master.getDuration();
+									double rms = audioInfo.getRMS();
+									double otp = audioInfo.getOTP();
+									double overallFloor = audioInfo.getOverallFloor();
+									double sampleFloor = audioInfo.getSampleFloor();
+									double duration = audioInfo.getDuration();
 									if (rms < -23 || rms > -18) {
 										warnings = warnings+
 										"* Your dBRMS should be between -23 and -18, but yours will be "+String.valueOf(rms)+".\n";
@@ -329,12 +329,12 @@ public class Main extends JPanel {
 									}
 									if (overallFloor == 0) {
 										warnings = warnings+
-										"* Your noise floor will be considered unnatural because it contains a value of "+master.getOverallFloorString()+".\n";
+										"* Your noise floor will be considered unnatural because it contains a value of "+audioInfo.getOverallFloorString()+".\n";
 									}
 									if (sampleFloor != 0 && (sampleFloor < -90 || sampleFloor > -60)) {
 										warnings = warnings+
 										"* ACX recommends at least 1 second of room tone, and no more than 5 seconds, at the start and end of every audio file\n"+
-										"with a noise floor greater than -90 dBRMS and less than -60 dBRMS, but yours will be "+master.getSampleFloorString()+" dBRMS.\n";
+										"with a noise floor greater than -90 dBRMS and less than -60 dBRMS, but yours will be "+audioInfo.getSampleFloorString()+" dBRMS.\n";
 									}
 									if (duration > 7200) {
 										warnings = warnings+
@@ -352,9 +352,9 @@ public class Main extends JPanel {
 								master.master(file);
 								masterButton.setText("Analyzing mastered audio...");
 								master.analyze(null);
-								iiTextField.setText(String.valueOf(master.getOI())+" LUFS / "+String.valueOf(master.getRMS())+" dBRMS");
-								itpTextField.setText(String.valueOf(master.getOTP())+" dBTP");
-								floorTextField.setText(master.getSampleFloorString()+" dBRMS");
+								iiTextField.setText(String.valueOf(audioInfo.getOI())+" LUFS / "+String.valueOf(audioInfo.getRMS())+" dBRMS");
+								itpTextField.setText(String.valueOf(audioInfo.getOTP())+" dBTP");
+								floorTextField.setText(audioInfo.getSampleFloorString()+" dBRMS");
 							}
 							masterButton.setText("Mastering complete!");
 						} else {masterButton.setText("Ensure FFmpeg is installed in your path!");}
