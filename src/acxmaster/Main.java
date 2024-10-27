@@ -15,6 +15,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 // Main controller class
 public class Main extends JPanel {
 	private static JFrame jFrame;
+	private static Boolean mode = true;
 
 	// Main controller constructor
 	private Main() {
@@ -44,6 +45,9 @@ public class Main extends JPanel {
 			while ((configLine = reader.readLine()) != null) {
 				String[] tokens = configLine.split("=", 2);
 				switch (tokens[0].toLowerCase()) {
+					case "mode":
+						try {mode = Boolean.parseBoolean(tokens[1]);} catch (Exception exception) {}
+						break;
 					case "1b":
 						graphicEQ.setOneBand(tokens[1]);
 						break;
@@ -142,6 +146,10 @@ public class Main extends JPanel {
 		JMenu settings = new JMenu("Settings");
 		jMenuBar.add(settings);
 
+		// Initialize mode menu item
+		JMenuItem modeItem = new JMenuItem("Mode");
+		settings.add(modeItem);
+
 		// Set up Targets menu item
 		JMenuItem targetsItem = new JMenuItem("Targets");
 		targetsItem.addActionListener(e -> new TargetsDialog(jFrame, targets));
@@ -163,6 +171,7 @@ public class Main extends JPanel {
 			try {
 				FileWriter writer = new FileWriter("acxmaster.conf");
 				writer.write(
+					"mode="+String.valueOf(mode)+"\n"+
 					"1b="+graphicEQ.getOneBand()+"\n"+
 					"2b="+graphicEQ.getTwoBand()+"\n"+
 					"3b="+graphicEQ.getThreeBand()+"\n"+
@@ -253,7 +262,12 @@ public class Main extends JPanel {
 			saveButton.setEnabled(true);
 			master.setSaveFile(null);
 			saveChooserTextField.setText("");
-			masterButton.setEnabled(false);
+			if (mode) {
+				masterButton.setEnabled(false);
+			} else {
+				masterButton.setText("Check!");
+				masterButton.setEnabled(true);
+			}
 		});
 		add(chooseButton);
 
@@ -305,57 +319,93 @@ public class Main extends JPanel {
 			new Thread(
 				new Runnable() {
 					public void run() {
-						if (master.check()) {
+						if (master.ffCheck()) {
 							for (File file : master.getFiles()) {
-								masterButton.setText("Analyzing source audio...");
-								master.analyze(file);
+								if (mode) {
+									masterButton.setText("Analyzing source audio...");
+									master.analyze(file);
+								} else {
+									masterButton.setText("Checking audio for problems...");
+									master.check(file);
+								}
+
 								AudioInfo audioInfo = master.getAudioInfo();
 
-								if (!options.getNoWarn()) {
-									masterButton.setText("Predicting problems...");
-									master.predict(file);
-									double rms = audioInfo.getRMS();
-									float rotp = audioInfo.getROTP();
+								if (!mode || !options.getNoWarn()) {
+									float otp;
+									double duration;
+									if (mode) {
+										masterButton.setText("Predicting problems...");
+										master.predict(file);
+										otp = audioInfo.getROTP();
+										duration = audioInfo.getDuration();
+									} else {
+										otp = (float)Math.round((float)audioInfo.getOTP()*(float)Math.pow(10, 1))/(float)Math.pow(10, 1);
+										duration = (double)audioInfo.getRoughDuration();
+									}
+									float rms = (float)Math.round((float)audioInfo.getRMS()*(float)Math.pow(10, 1))/(float)Math.pow(10, 1);
 									double overallFloor = audioInfo.getOverallFloor();
-									double sampleFloor = audioInfo.getSampleFloor();
-									double duration = audioInfo.getDuration();
+									float sampleFloor = 0;
+									if (audioInfo.getSampleFloor() != 0) {
+										sampleFloor = (float)Math.round((float)audioInfo.getSampleFloor()*(float)Math.pow(10, 1))/(float)Math.pow(10, 1);
+									}
 									String warnings = "";
+									String tense;
+									if (mode) {tense = " will be ";
+									} else {tense = " is ";}
 									if (rms < -23 || rms > -18) {
 										warnings = warnings+
-										"* Your dBRMS should be between -23 and -18, but yours will be "+String.valueOf(rms)+".\n";
+										"* Your dBRMS should be between -23 and -18, but yours"+tense+String.valueOf(rms)+".\n";
 									}
-									if (rotp < -6 || rotp > -3) {
+									if (otp < -6 || otp > -3) {
 										warnings = warnings+
-										"* Your true peak should be between -6 dBTP and -3 dBTP, but yours will be "+String.valueOf(rotp)+" dBTP.\n";
+										"* Your true peak should be between -6 dBTP and -3 dBTP, but yours"+tense+String.valueOf(otp)+" dBTP.\n";
 									}
 									if (overallFloor == 0) {
 										warnings = warnings+
-										"* Your noise floor will be considered unnatural because it contains a value of "+audioInfo.getOverallFloorString()+".\n";
+										"* Your noise floor"+tense+"considered unnatural because it contains a value of "+audioInfo.getOverallFloorString()+".\n";
 									}
 									if (sampleFloor != 0 && (sampleFloor < -90 || sampleFloor > -60)) {
 										warnings = warnings+
 										"* ACX recommends at least 1 second of room tone, and no more than 5 seconds, at the start and end of every audio file\n"+
-										"with a noise floor greater than -90 dBRMS and less than -60 dBRMS, but yours will be "+audioInfo.getSampleFloorString()+" dBRMS.\n";
+										"with a noise floor greater than -90 dBRMS and less than -60 dBRMS, but yours"+tense+String.valueOf(sampleFloor)+" dBRMS.\n";
 									}
 									if (duration > 7200) {
 										warnings = warnings+
-										"* Your audio file will exceed the ACX duration limit of 120 minutes.\n";
+										"* Your audio file should be no longer than 120 minutes, but yours"+tense+"exceeding that.\n";
 									}
 									if (!warnings.isEmpty()) {
-										warnings = "\""+file.getPath()+"\"\n\n"+warnings+
-										"\nWould you like to encode the audio file anyway?\n";
-										int choice = JOptionPane.showConfirmDialog(null, warnings, "Warning", JOptionPane.YES_NO_OPTION);
-										if(choice != JOptionPane.YES_OPTION){continue;};
+										if (mode) {
+											warnings = "\""+file.getPath()+"\"\n\n"+warnings+
+											"\nWould you like to encode the audio file anyway?\n";
+											int choice = JOptionPane.showConfirmDialog(null, warnings, "Warning", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+											if(choice != JOptionPane.YES_OPTION){continue;};
+										} else {
+											warnings = "\""+file.getPath()+"\"\n\n"+warnings;
+											int choice = JOptionPane.showConfirmDialog(null, warnings, "Warning", JOptionPane.DEFAULT_OPTION, JOptionPane.WARNING_MESSAGE);
+										}
 									}
 								}
 
-								masterButton.setText("Mastering...");
-								master.master(file);
-								iiTextField.setText(String.valueOf(audioInfo.getOI())+" LUFS / "+String.valueOf(audioInfo.getRMS())+" dBRMS");
-								itpTextField.setText(String.valueOf(audioInfo.getROTP())+" dBTP");
-								floorTextField.setText(audioInfo.getSampleFloorString()+" dBRMS");
+								String rmsString = String.valueOf((float)Math.round((float)audioInfo.getRMS()*(float)Math.pow(10, 1))/(float)Math.pow(10, 1));
+								String floorString;
+								if (audioInfo.getOverallFloor() == 0) {floorString = audioInfo.getOverallFloorString();
+								} else if (audioInfo.getSampleFloor() == 0) {floorString = audioInfo.getSampleFloorString();
+								} else {floorString = String.valueOf((float)Math.round((float)audioInfo.getSampleFloor()*(float)Math.pow(10, 1))/(float)Math.pow(10, 1));}
+								if (mode) {
+									masterButton.setText("Mastering...");
+									master.master(file);
+									iiTextField.setText(String.valueOf(audioInfo.getOI())+" LUFS / "+rmsString+" dBRMS");
+									itpTextField.setText(String.valueOf(audioInfo.getROTP())+" dBTP");
+								} else {
+									String otp = String.valueOf((float)Math.round((float)audioInfo.getOTP()*(float)Math.pow(10, 1))/(float)Math.pow(10, 1));
+									iiTextField.setText(rmsString+" dBRMS");
+									itpTextField.setText(otp+" dBTP");
+								}
+								floorTextField.setText(floorString+" dBRMS");
 							}
-							masterButton.setText("Mastering complete!");
+							if (mode) {masterButton.setText("Mastering complete!");
+							} else {masterButton.setText("Checking complete!");}
 						} else {masterButton.setText("Ensure FFmpeg is installed in your path!");}
 					}
 				}
@@ -386,6 +436,24 @@ public class Main extends JPanel {
 		floorTextField.setEditable(false);
 		floorTextField.setBackground(Color.WHITE);
 		add(floorTextField);
+
+		// Set up mode menu item
+		modeItem.addActionListener(e -> {
+			ModeDialog modeDialog = new ModeDialog(jFrame, mode);
+			mode = modeDialog.getMode();
+			targetsItem.setEnabled(mode);
+			eqItem.setEnabled(mode);
+			optionsItem.setEnabled(mode);
+			saveButton.setVisible(mode);
+			saveChooserTextField.setVisible(mode);
+			if (mode) {
+				masterButton.setText("Master!");
+				masterButton.setEnabled(false);
+			} else {
+				masterButton.setText("Check!");
+				if (!fileChooserTextField.getText().isEmpty()) {masterButton.setEnabled(true);}
+			}
+		});
 	}
 
 	public static void main(String[] args) {

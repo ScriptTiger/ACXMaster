@@ -64,7 +64,11 @@ class AudioInfo {
 	// Setters
 	//////////
 
-	// Constructor
+	// Constructor for Check mode
+	public AudioInfo(File file) {
+	}
+
+	// Constructor for Master mode
 	public AudioInfo(File file, File saveFile, Boolean isSingle) {
 		if (isSingle) {
 			saveFileString = saveFile.getPath();

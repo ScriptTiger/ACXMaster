@@ -3,9 +3,10 @@
 [![ScriptTiger/TorPanel](https://scripttiger.github.io/images/ACXMaster-Interface.png)](https://github.com/ScriptTiger/ACXMaster)
 
 # ACX Master
-ACX Master is a simple mastering tool designed to master and encode the final MP3 which an ACX audiobook narrator will upload to ACX in order to pass the ACX submission requirements with the least amount of headache possible.
+ACX Master is a simple stand-alone ACX checker and mastering tool which can work on either single files or on multiple in a batch process. When in Check Mode, the tool is designed to check audio files against the ACX submission requirements and alert you to any conflicts. When in Master mode, the tool is designed to master and encode the final MP3 files which an ACX audiobook narrator will upload to ACX in order to pass the ACX submission requirements with the least amount of headache possible.
 
 Features:  
+- Can switch between Check mode and Master mode, to allow you to use the tool as either a stand-alone ACX checker or as a mastering tool.
 - Adjustable targets for integrated loudness, loudness range, and true peak.
 - 18-band graphic equalizer.
 - Optional effects to suppress noise, de-click, noise gate, generate noise (if your noise floor is too low), as well as the ability to output stereo files if desired.

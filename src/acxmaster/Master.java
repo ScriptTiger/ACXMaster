@@ -157,7 +157,7 @@ class Master {
 	//////////////////////////
 
 	// Function to check ffmpeg
-	public Boolean check() {
+	public Boolean ffCheck() {
 		Boolean err = true;
 		try {
 			Runtime runtime = Runtime.getRuntime();
@@ -173,23 +173,32 @@ class Master {
 
 	// Function to analyze files
 	public void analyze(File file) {
-		String layout = "mono";
 		audioInfo = new AudioInfo(file, saveFile, isSingle);
-		String[] stats = {"ffmpeg", "-hide_banner", "-i", file.getPath(), "-vn", "-sn", "-dn", "-filter_complex", "aformat=cl="+layout+","+getChain()+"asplit[loudnorm],astats=measure_perchannel=none:measure_overall=Noise_floor+Number_of_samples+Peak_level+RMS_level;[loudnorm]loudnorm=print_format=summary", "-f", "null", ""};
-		ffmpeg(false, stats);
+		String[] analyze = {"ffmpeg", "-hide_banner", "-i", file.getPath(), "-vn", "-sn", "-dn", "-filter_complex", "aformat=cl=mono,"+getChain()+"asplit[loudnorm],astats=measure_perchannel=none:measure_overall=Noise_floor+Number_of_samples+Peak_level+RMS_level;[loudnorm]loudnorm=print_format=summary", "-f", "null", ""};
+		ffmpeg(false, analyze);
+	}
+
+	// Function check files
+	public void check(File file) {
+		audioInfo = new AudioInfo(file);
+		String[] preCheck = {"ffmpeg", "-hide_banner", "-i", file.getPath(), "-vn", "-sn", "-dn", "-frames:a", "0", "-f", "null", ""};
+		ffmpeg(false, preCheck);
+		String end = String.valueOf(audioInfo.getRoughDuration()-1);
+		String[] check = {"ffmpeg", "-hide_banner", "-i", file.getPath(), "-vn", "-sn", "-dn", "-filter_complex", "asplit=3[end][astats],atrim=end=1[start];[end]atrim=start="+end+",[start]concat=2:0:1,astats=measure_perchannel=none:measure_overall=RMS_level;[astats]astats=measure_perchannel=none:measure_overall=Noise_floor+Number_of_samples+Peak_level+RMS_level", "-f", "null", ""};
+		ffmpeg(true, check);
 	}
 
 	// Function to predict problems
 	public void predict(File file) {
 		String end = String.valueOf(audioInfo.getRoughDuration()-1);
-		String[] predict = {"ffmpeg", "-hide_banner", "-y", "-i", file.getPath(), "-vn", "-sn", "-dn", "-filter_complex", "aformat=cl=mono,"+getChain()+"loudnorm=i="+String.valueOf(targets.getI())+":lra="+String.valueOf(targets.getLRA())+":tp="+String.valueOf(targets.getTP())+":measured_I="+String.valueOf(audioInfo.getII())+":measured_LRA="+String.valueOf(audioInfo.getILRA())+":measured_tp="+String.valueOf(audioInfo.getITP())+":measured_thresh="+String.valueOf(audioInfo.getIT())+":offset="+String.valueOf(audioInfo.getTO())+":print_format=summary"+options.getStereoChain()+",asplit=3[end][astats],atrim=end=1[start];[end]atrim=start="+end+",[start]concat=2:0:1,astats=measure_perchannel=none:measure_overall=RMS_level;[astats]astats=measure_perchannel=none:measure_overall=Noise_floor+Number_of_samples+Peak_level+RMS_level", "-f", "null", ""};
+		String[] predict = {"ffmpeg", "-hide_banner", "-i", file.getPath(), "-vn", "-sn", "-dn", "-filter_complex", "aformat=cl=mono,"+getChain()+"loudnorm=i="+String.valueOf(targets.getI())+":lra="+String.valueOf(targets.getLRA())+":tp="+String.valueOf(targets.getTP())+":measured_I="+String.valueOf(audioInfo.getII())+":measured_LRA="+String.valueOf(audioInfo.getILRA())+":measured_tp="+String.valueOf(audioInfo.getITP())+":measured_thresh="+String.valueOf(audioInfo.getIT())+":offset="+String.valueOf(audioInfo.getTO())+":print_format=summary"+options.getStereoChain()+",asplit=3[end][astats],atrim=end=1[start];[end]atrim=start="+end+",[start]concat=2:0:1,astats=measure_perchannel=none:measure_overall=RMS_level;[astats]astats=measure_perchannel=none:measure_overall=Noise_floor+Number_of_samples+Peak_level+RMS_level", "-f", "null", ""};
 		ffmpeg(true, predict);
 	}
 
 	// Function to master files
 	public void master(File file) {
 		String end = String.valueOf(audioInfo.getRoughDuration()-1);
-		String[] encode = {"ffmpeg", "-hide_banner", "-y", "-i", file.getPath(), "-vn", "-sn", "-dn", "-filter_complex", "aformat=cl=mono,"+getChain()+"loudnorm=i="+String.valueOf(targets.getI())+":lra="+String.valueOf(targets.getLRA())+":tp="+String.valueOf(targets.getTP())+":measured_I="+String.valueOf(audioInfo.getII())+":measured_LRA="+String.valueOf(audioInfo.getILRA())+":measured_tp="+String.valueOf(audioInfo.getITP())+":measured_thresh="+String.valueOf(audioInfo.getIT())+":offset="+String.valueOf(audioInfo.getTO())+":print_format=summary"+options.getStereoChain()+",asplit=4[end][astats][encode],atrim=end=1[start];[end]atrim=start="+end+",[start]concat=2:0:1,astats=measure_perchannel=none:measure_overall=RMS_level[null0];[astats]astats=measure_perchannel=none:measure_overall=Noise_floor+Number_of_samples+Peak_level+RMS_level[null1]", "-map", "[encode]", "-ar", "44.1k", "-ab", "192k", "-f", "mp3", audioInfo.getSaveFileString(), "-map", "[null0]", "-map", "[null1]", "-f", "null", ""};
-		ffmpeg(true, encode);
+		String[] master = {"ffmpeg", "-hide_banner", "-y", "-i", file.getPath(), "-vn", "-sn", "-dn", "-filter_complex", "aformat=cl=mono,"+getChain()+"loudnorm=i="+String.valueOf(targets.getI())+":lra="+String.valueOf(targets.getLRA())+":tp="+String.valueOf(targets.getTP())+":measured_I="+String.valueOf(audioInfo.getII())+":measured_LRA="+String.valueOf(audioInfo.getILRA())+":measured_tp="+String.valueOf(audioInfo.getITP())+":measured_thresh="+String.valueOf(audioInfo.getIT())+":offset="+String.valueOf(audioInfo.getTO())+":print_format=summary"+options.getStereoChain()+",asplit=4[end][astats][master],atrim=end=1[start];[end]atrim=start="+end+",[start]concat=2:0:1,astats=measure_perchannel=none:measure_overall=RMS_level[null0];[astats]astats=measure_perchannel=none:measure_overall=Noise_floor+Number_of_samples+Peak_level+RMS_level[null1]", "-map", "[master]", "-ar", "44.1k", "-ab", "192k", "-f", "mp3", audioInfo.getSaveFileString(), "-map", "[null0]", "-map", "[null1]", "-f", "null", ""};
+		ffmpeg(true, master);
 	}
 }
