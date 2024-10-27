@@ -102,7 +102,7 @@ public class Main extends JPanel {
 						options.setRnnn(tokens[1]);
 						break;
 					case "stereo":
-						options.setStereo(Boolean.parseBoolean(tokens[1]));
+						try {options.setStereo(Boolean.parseBoolean(tokens[1]));} catch (Exception exception) {}
 						break;
 					case "declick":
 						options.setDeclick(tokens[1]);
@@ -114,19 +114,19 @@ public class Main extends JPanel {
 						options.setNoise(tokens[1]);
 						break;
 					case "nowarn":
-						options.setNoWarn(Boolean.parseBoolean(tokens[1]));
+						try {options.setNoWarn(Boolean.parseBoolean(tokens[1]));} catch (Exception exception) {}
 						break;
 					case "custom":
 						options.setCustom(tokens[1]);
 						break;
 					case "i":
-						targets.setI(Float.parseFloat(tokens[1]));
+						try {targets.setI(Float.parseFloat(tokens[1]));} catch (Exception exception) {}
 						break;
 					case "lra":
-						targets.setLRA(Float.parseFloat(tokens[1]));
+						try {targets.setLRA(Float.parseFloat(tokens[1]));} catch (Exception exception) {}
 						break;
 					case "tp":
-						targets.setTP(Float.parseFloat(tokens[1]));
+						try {targets.setTP(Float.parseFloat(tokens[1]));} catch (Exception exception) {}
 						break;
 				}
 			}
@@ -302,7 +302,6 @@ public class Main extends JPanel {
 			masterButton.setEnabled(false);
 			chooseButton.setEnabled(false);
 			saveButton.setEnabled(false);
-			master.nextBatch();
 			new Thread(
 				new Runnable() {
 					public void run() {
@@ -313,19 +312,21 @@ public class Main extends JPanel {
 								AudioInfo audioInfo = master.getAudioInfo();
 
 								if (!options.getNoWarn()) {
-									String warnings = "";
+									masterButton.setText("Predicting problems...");
+									master.predict(file);
 									double rms = audioInfo.getRMS();
-									double otp = audioInfo.getOTP();
+									float rotp = audioInfo.getROTP();
 									double overallFloor = audioInfo.getOverallFloor();
 									double sampleFloor = audioInfo.getSampleFloor();
 									double duration = audioInfo.getDuration();
+									String warnings = "";
 									if (rms < -23 || rms > -18) {
 										warnings = warnings+
 										"* Your dBRMS should be between -23 and -18, but yours will be "+String.valueOf(rms)+".\n";
 									}
-									if (otp < -6 || otp > -3) {
+									if (rotp < -6 || rotp > -3) {
 										warnings = warnings+
-										"* Your true peak should be between -6 dBTP and -3 dBTP, but yours will be "+String.valueOf(otp)+" dBTP.\n";
+										"* Your true peak should be between -6 dBTP and -3 dBTP, but yours will be "+String.valueOf(rotp)+" dBTP.\n";
 									}
 									if (overallFloor == 0) {
 										warnings = warnings+
@@ -350,10 +351,8 @@ public class Main extends JPanel {
 
 								masterButton.setText("Mastering...");
 								master.master(file);
-								masterButton.setText("Analyzing mastered audio...");
-								master.analyze(null);
 								iiTextField.setText(String.valueOf(audioInfo.getOI())+" LUFS / "+String.valueOf(audioInfo.getRMS())+" dBRMS");
-								itpTextField.setText(String.valueOf(audioInfo.getOTP())+" dBTP");
+								itpTextField.setText(String.valueOf(audioInfo.getROTP())+" dBTP");
 								floorTextField.setText(audioInfo.getSampleFloorString()+" dBRMS");
 							}
 							masterButton.setText("Mastering complete!");

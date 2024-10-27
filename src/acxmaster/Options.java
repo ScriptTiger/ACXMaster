@@ -32,6 +32,10 @@ class Options {
 			return "[noise];"+noise+"[noise]amix=2:shortest,";
 		} else {return ",";}
 	}
+	public String getStereoChain() {
+		if (stereo) {return ",asplit,join";
+		} else {return "";}
+	}
 
 	//////////
 	// Setters

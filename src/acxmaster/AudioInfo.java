@@ -15,12 +15,15 @@ class AudioInfo {
 
 	// Analysis stats
 	private static int sampleRate = 0;
+	private static String roughDurationString = null;
+	private static float roughDuration = 0;
 	private static float ii = 0;
 	private static float itp = 0;
 	private static float ilra = 0;
 	private static float it = 0;
 	private static float to = 0;
 	private static float oi = 0;
+	private static float rotp = 0;
 	private static double otp = 0;
 	private static double rms = 0;
 	private static String overallFloorString = null;
@@ -39,12 +42,15 @@ class AudioInfo {
 
 	// Analysis stats
 	public int getSampleRate() {return sampleRate;}
+	public String getRoughDurationString() {return roughDurationString;}
+	public float getRoughDuration() {return roughDuration;}
 	public float getII() {return ii;}
 	public float getITP() {return itp;}
 	public float getILRA() {return ilra;}
 	public float getIT() {return it;}
 	public float getTO() {return to;}
 	public float getOI() {return oi;}
+	public float getROTP() {return rotp;}
 	public double getOTP() {return otp;}
 	public double getRMS() {return rms;}
 	public String getOverallFloorString() {return overallFloorString;}
@@ -86,13 +92,16 @@ class AudioInfo {
 
 	// Analysis stats
 	public void setSampleRate(int sampleRate) {this.sampleRate = sampleRate;}
+	public void setRoughDurationString(String roughDurationString) {this.roughDurationString = roughDurationString;}
+	public void setRoughDuration(float roughDuration) {this.roughDuration = roughDuration;}
 	public void setII(float ii) {this.ii = ii;}
 	public void setITP(float itp) {this.itp = itp;}
 	public void setILRA(float ilra) {this.ilra = ilra;}
 	public void setIT(float it) {this.it = it;}
 	public void setTO(float to) {this.to = to;}
-	public void setOTP(double otp) {this.otp = otp;}
 	public void setOI(float oi) {this.oi = oi;}
+	public void setROTP(float rotp) {this.rotp = rotp;}
+	public void setOTP(double otp) {this.otp = otp;}
 	public void setRMS(double rms) {this.rms = rms;}
 	public void setOverallFloorString(String overallFloorString) {this.overallFloorString = overallFloorString;}
 	public void setOverallFloor(double overallFloor) {this.overallFloor = overallFloor;}
