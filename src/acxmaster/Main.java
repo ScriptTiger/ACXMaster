@@ -316,6 +316,10 @@ public class Main extends JPanel {
 			masterButton.setEnabled(false);
 			chooseButton.setEnabled(false);
 			saveButton.setEnabled(false);
+			modeItem.setEnabled(false);
+			targetsItem.setEnabled(false);
+			eqItem.setEnabled(false);
+			optionsItem.setEnabled(false);
 			new Thread(
 				new Runnable() {
 					public void run() {
@@ -407,13 +411,19 @@ public class Main extends JPanel {
 							if (mode) {masterButton.setText("Mastering complete!");
 							} else {masterButton.setText("Checking complete!");}
 						} else {masterButton.setText("Ensure FFmpeg is installed in your path!");}
+						fileChooserTextField.setText("");
+						saveChooserTextField.setText("");
+						saveButton.setText("Save...");
+						chooseButton.setEnabled(true);
+						modeItem.setEnabled(true);
+						if (mode) {
+							targetsItem.setEnabled(true);
+							eqItem.setEnabled(true);
+							optionsItem.setEnabled(true);
+						}
 					}
 				}
 			).start();
-			fileChooserTextField.setText("");
-			saveChooserTextField.setText("");
-			saveButton.setText("Save...");
-			chooseButton.setEnabled(true);
 		});
 		add(masterButton);
 
