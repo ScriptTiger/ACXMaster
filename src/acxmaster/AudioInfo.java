@@ -14,7 +14,9 @@ class AudioInfo {
 	private static String saveFileString = null;
 
 	// Analysis stats
+	private static String codec = null;
 	private static int sampleRate = 0;
+	private static int bitRate = 0;
 	private static String roughDurationString = null;
 	private static float roughDuration = 0;
 	private static float ii = 0;
@@ -41,7 +43,9 @@ class AudioInfo {
 	public String getSaveFileString() {return saveFileString;}
 
 	// Analysis stats
+	public String getCodec() {return codec;}
 	public int getSampleRate() {return sampleRate;}
+	public int getBitRate() {return bitRate;}
 	public String getRoughDurationString() {return roughDurationString;}
 	public float getRoughDuration() {return roughDuration;}
 	public float getII() {return ii;}
@@ -95,7 +99,9 @@ class AudioInfo {
 	}
 
 	// Analysis stats
+	public void setCodec(String codec) {this.codec = codec;}
 	public void setSampleRate(int sampleRate) {this.sampleRate = sampleRate;}
+	public void setBitRate(int bitRate) {this.bitRate = bitRate;}
 	public void setRoughDurationString(String roughDurationString) {this.roughDurationString = roughDurationString;}
 	public void setRoughDuration(float roughDuration) {this.roughDuration = roughDuration;}
 	public void setII(float ii) {this.ii = ii;}

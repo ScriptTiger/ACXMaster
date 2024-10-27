@@ -378,6 +378,23 @@ public class Main extends JPanel {
 										warnings = warnings+
 										"* Your audio file should be no longer than 120 minutes, but yours"+tense+"exceeding that.\n";
 									}
+									if (!mode) {
+										String codec = audioInfo.getCodec();
+										int sampleRate = audioInfo.getSampleRate();
+										int bitRate = audioInfo.getBitRate();
+										if (sampleRate != 44100) {
+											warnings = warnings+
+											"* Your sample rate should be 44100 Hz, but yours is "+String.valueOf(sampleRate)+" Hz.\n";
+										}
+										if (bitRate < 192) {
+											warnings = warnings+
+											"* Your bit rate should be at least 192 kb/s or higher, but yours is "+String.valueOf(bitRate)+" kb/s.\n";
+										}
+										if (!codec.equals("mp3")) {
+											warnings = warnings+
+											"* Your audio file should be encoded to mp3, but yours is encoded to "+codec+".\n";
+										}
+									}
 									if (!warnings.isEmpty()) {
 										if (mode) {
 											warnings = "\""+file.getPath()+"\"\n\n"+warnings+

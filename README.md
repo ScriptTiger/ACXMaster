@@ -11,7 +11,8 @@ Features:
 - 18-band graphic equalizer.
 - Optional effects to suppress noise, de-click, noise gate, generate noise (if your noise floor is too low), as well as the ability to output stereo files if desired.
 - Can select one file at a time, or select multiple files at once for a batch process.
-- Conformed audio can first be optionally checked against ACX standards for RMS, true peak, noise floor, and duration, and prompt you with any warnings which may still persist before being written to a file. However, if you feel confident your presets are acceptable, you can choose to disable this check to speed up the process.
+- Conformed audio can first be optionally checked to prompt you with any warnings which may still persist before being written to a file. However, if you feel confident your presets are acceptable, you can choose to disable this check to speed up the process.
+- When checking audio against ACX submission requirements, properties checked are RMS, true peak, noise floor, duration, sample rate, bit rate, and codec.
 - All of your settings can be saved to a configuration file which will be loaded at each program start.
 
 **Download the precompiled executables for your target operating system to get started (only 64-bit platforms currently supported):**  

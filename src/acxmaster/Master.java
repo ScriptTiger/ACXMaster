@@ -75,7 +75,7 @@ class Master {
 			BufferedReader stderrBufferedReader = new BufferedReader(stderrReader);
 			String line = null;
 			int astatsCount = 0;
-			Boolean getSampleRate = true;
+			Boolean getStreamInfo = true;
 			while ((line = stderrBufferedReader.readLine()) != null) {
 				if (line.startsWith("[Parsed_astats_")) {
 					String[] stat = line.split("] ")[1].split(": ");
@@ -127,9 +127,12 @@ class Master {
 						String[] roughDurationParsed = audioInfo.getRoughDurationString().split(":");
 						try {audioInfo.setRoughDuration((Float.parseFloat(roughDurationParsed[0])*3600)+(Float.parseFloat(roughDurationParsed[1])*60)+Float.parseFloat(roughDurationParsed[2]));} catch (Exception exception) {}
 					}
-					if (getSampleRate && line.matches("^\\s+Stream\\s#\\d.*")) {
-						try {audioInfo.setSampleRate(Integer.parseInt(line.split(",")[1].replace("Hz", "").trim()));} catch (Exception exception) {}
-						getSampleRate = false;
+					if (getStreamInfo && line.matches("^\\s+Stream\\s#\\d.*")) {
+						String[] elements = line.split(",");
+						audioInfo.setCodec(elements[0].split(":")[3].split(" ")[1].trim());
+						try {audioInfo.setSampleRate(Integer.parseInt(elements[1].split(" ")[1]));} catch (Exception exception) {}
+						try {audioInfo.setBitRate(Integer.parseInt(elements[4].split(" ")[1]));} catch (Exception exception) {}
+						getStreamInfo = false;
 					}
 					if (line.startsWith("Input True Peak:")) {
 						try {audioInfo.setITP(Float.parseFloat(line.split("\\s+")[3]));} catch (Exception exception) {}
