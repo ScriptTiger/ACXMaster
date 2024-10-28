@@ -15,7 +15,7 @@ class Check {
 	public Boolean getSkip() {return skip;}
 	private void setSkip() {skip = true;}
 
-	public Check(AudioInfo audioInfo, Boolean mode, File file) {
+	public Check(AudioInfo audioInfo, Boolean mode, String file, Boolean isSameLayout) {
 		float otp;
 		double duration;
 		if (mode) {
@@ -61,6 +61,10 @@ class Check {
 			int sampleRate = audioInfo.getSampleRate();
 			int bitRate = audioInfo.getBitRate();
 			String codec = audioInfo.getCodec();
+			if (!isSameLayout) {
+				warnings = warnings+
+				"* Your channel layout should be consistent for all audio files of the same project, either all mono or all stereo, but yours is inconsistent.\n";
+			}
 			if (!layout.equals("mono") && !layout.equals("stereo")) {
 				warnings = warnings+
 				"* Your channel layout should be either mono or stereo, but yours is "+layout+".\n";
@@ -80,12 +84,12 @@ class Check {
 		}
 		if (!warnings.isEmpty()) {
 			if (mode) {
-				warnings = "\""+file.getPath()+"\"\n\n"+warnings+
+				warnings = "\""+file+"\"\n\n"+warnings+
 				"\nWould you like to encode the audio file anyway?\n";
 				int choice = JOptionPane.showConfirmDialog(null, warnings, "Warning", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
 				if(choice != JOptionPane.YES_OPTION){setSkip();};
 			} else {
-				warnings = "\""+file.getPath()+"\"\n\n"+warnings;
+				warnings = "\""+file+"\"\n\n"+warnings;
 				int choice = JOptionPane.showConfirmDialog(null, warnings, "Warning", JOptionPane.DEFAULT_OPTION, JOptionPane.WARNING_MESSAGE);
 			}
 		}

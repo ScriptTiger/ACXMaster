@@ -338,7 +338,7 @@ public class Main extends JPanel {
 										masterButton.setText("Predicting problems...");
 										master.predict(file);
 									}
-									if ((new Check(audioInfo, mode, file)).getSkip()) {continue;}
+									if ((new Check(audioInfo, mode, file.getPath(), master.isSameLayout())).getSkip()) {continue;}
 								}
 								String rmsString = String.valueOf((float)Math.round((float)audioInfo.getRMS()*(float)Math.pow(10, 1))/(float)Math.pow(10, 1));
 								String floorString;

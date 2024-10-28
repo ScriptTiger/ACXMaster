@@ -22,6 +22,8 @@ class Master {
 
 	// Analysis stats
 	private static AudioInfo audioInfo;
+	private static String layout = null;
+	private static Boolean isSameLayout = true;
 
 	// Additional filters
 	private static String chain = "";
@@ -42,6 +44,7 @@ class Master {
 
 	// Analysis stats
 	public AudioInfo getAudioInfo() {return audioInfo;}
+	public Boolean isSameLayout() {return isSameLayout;}
 
 	// Additional filters
 	private String getChain() {
@@ -57,6 +60,8 @@ class Master {
 	public void setFiles(File[] files) {
 			this.files = files;
 			chain = "";
+			layout = null;
+			isSameLayout = true;
 	}
 	public void setIsSingle(Boolean isSingle) {this.isSingle = isSingle;}
 	public void setSaveFile(File saveFile) {this.saveFile = saveFile;}
@@ -132,6 +137,10 @@ class Master {
 						audioInfo.setCodec(elements[0].split(":")[3].split(" ")[1].trim());
 						try {audioInfo.setSampleRate(Integer.parseInt(elements[1].split(" ")[1]));} catch (Exception exception) {}
 						audioInfo.setLayout(elements[2].trim());
+						if (isSameLayout) {
+							if (layout == null) {layout = audioInfo.getLayout();
+							} else if (!layout.equals(audioInfo.getLayout())) {isSameLayout = false;}
+						}
 						try {audioInfo.setBitRate(Integer.parseInt(elements[4].split(" ")[1]));} catch (Exception exception) {}
 						getStreamInfo = false;
 					}
