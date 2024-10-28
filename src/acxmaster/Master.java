@@ -131,6 +131,7 @@ class Master {
 						String[] elements = line.split(",");
 						audioInfo.setCodec(elements[0].split(":")[3].split(" ")[1].trim());
 						try {audioInfo.setSampleRate(Integer.parseInt(elements[1].split(" ")[1]));} catch (Exception exception) {}
+						audioInfo.setLayout(elements[2].trim());
 						try {audioInfo.setBitRate(Integer.parseInt(elements[4].split(" ")[1]));} catch (Exception exception) {}
 						getStreamInfo = false;
 					}

@@ -57,9 +57,14 @@ class Check {
 			"* Your audio file should be no longer than 120 minutes, but yours"+tense+"exceeding that.\n";
 		}
 		if (!mode) {
-			String codec = audioInfo.getCodec();
+			String layout = audioInfo.getLayout();
 			int sampleRate = audioInfo.getSampleRate();
 			int bitRate = audioInfo.getBitRate();
+			String codec = audioInfo.getCodec();
+			if (!layout.equals("mono") && !layout.equals("stereo")) {
+				warnings = warnings+
+				"* Your channel layout should be either mono or stereo, but yours is "+layout+".\n";
+			}
 			if (sampleRate != 44100) {
 				warnings = warnings+
 				"* Your sample rate should be 44100 Hz, but yours is "+String.valueOf(sampleRate)+" Hz.\n";

@@ -16,6 +16,7 @@ class AudioInfo {
 	// Analysis stats
 	private static String codec = null;
 	private static int sampleRate = 0;
+	private static String layout = null;
 	private static int bitRate = 0;
 	private static String roughDurationString = null;
 	private static float roughDuration = 0;
@@ -45,6 +46,7 @@ class AudioInfo {
 	// Analysis stats
 	public String getCodec() {return codec;}
 	public int getSampleRate() {return sampleRate;}
+	public String getLayout() {return layout;}
 	public int getBitRate() {return bitRate;}
 	public String getRoughDurationString() {return roughDurationString;}
 	public float getRoughDuration() {return roughDuration;}
@@ -101,6 +103,7 @@ class AudioInfo {
 	// Analysis stats
 	public void setCodec(String codec) {this.codec = codec;}
 	public void setSampleRate(int sampleRate) {this.sampleRate = sampleRate;}
+	public void setLayout(String layout) {this.layout = layout;}
 	public void setBitRate(int bitRate) {this.bitRate = bitRate;}
 	public void setRoughDurationString(String roughDurationString) {this.roughDurationString = roughDurationString;}
 	public void setRoughDuration(float roughDuration) {this.roughDuration = roughDuration;}
