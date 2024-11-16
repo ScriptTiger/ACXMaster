@@ -13,6 +13,7 @@ class Master {
 	// Singletons
 	private final GraphicEQ graphicEQ = new GraphicEQ();
 	private final Targets targets = new Targets();
+	private final Export export = new Export();
 	private final Options options = new Options();
 
 	// Files
@@ -35,6 +36,7 @@ class Master {
 	// Singletons
 	public GraphicEQ getGraphicEQ() {return graphicEQ;}
 	public Targets getTargets() {return targets;}
+	public Export getExport() {return export;}
 	public Options getOptions() {return options;}
 
 	// Files
@@ -186,7 +188,7 @@ class Master {
 
 	// Function to analyze files
 	public void analyze(File file) {
-		audioInfo = new AudioInfo(file, saveFile, isSingle);
+		audioInfo = new AudioInfo(file, saveFile, isSingle, export.getExtension());
 		String[] analyze = {"ffmpeg", "-hide_banner", "-i", file.getPath(), "-vn", "-sn", "-dn", "-filter_complex", "aformat=cl=mono,"+getChain()+"asplit[loudnorm],astats=measure_perchannel=none:measure_overall=Noise_floor+Number_of_samples+Peak_level+RMS_level;[loudnorm]loudnorm=print_format=summary", "-f", "null", ""};
 		ffmpeg(false, analyze);
 	}
@@ -211,7 +213,10 @@ class Master {
 	// Function to master files
 	public void master(File file) {
 		String end = String.valueOf(audioInfo.getRoughDuration()-1);
-		String[] master = {"ffmpeg", "-hide_banner", "-y", "-i", file.getPath(), "-vn", "-sn", "-dn", "-filter_complex", "aformat=cl=mono,"+getChain()+"loudnorm=i="+String.valueOf(targets.getI())+":lra="+String.valueOf(targets.getLRA())+":tp="+String.valueOf(targets.getTP())+":measured_I="+String.valueOf(audioInfo.getII())+":measured_LRA="+String.valueOf(audioInfo.getILRA())+":measured_tp="+String.valueOf(audioInfo.getITP())+":measured_thresh="+String.valueOf(audioInfo.getIT())+":offset="+String.valueOf(audioInfo.getTO())+":print_format=summary"+options.getStereoChain()+",asplit=4[end][astats][master],atrim=end=1[start];[end]atrim=start="+end+",[start]concat=2:0:1,astats=measure_perchannel=none:measure_overall=RMS_level[null0];[astats]astats=measure_perchannel=none:measure_overall=Noise_floor+Number_of_samples+Peak_level+RMS_level[null1]", "-map", "[master]", "-ar", "44.1k", "-ab", "192k", "-f", "mp3", audioInfo.getSaveFileString(), "-map", "[null0]", "-map", "[null1]", "-f", "null", ""};
+		int sampleRate;
+		if (export.getSampleRate() == 0) {sampleRate = audioInfo.getSampleRate();
+		} else {sampleRate = export.getSampleRate();}
+		String[] master = {"ffmpeg", "-hide_banner", "-y", "-i", file.getPath(), "-vn", "-sn", "-dn", "-filter_complex", "aformat=cl=mono,"+getChain()+"loudnorm=i="+String.valueOf(targets.getI())+":lra="+String.valueOf(targets.getLRA())+":tp="+String.valueOf(targets.getTP())+":measured_I="+String.valueOf(audioInfo.getII())+":measured_LRA="+String.valueOf(audioInfo.getILRA())+":measured_tp="+String.valueOf(audioInfo.getITP())+":measured_thresh="+String.valueOf(audioInfo.getIT())+":offset="+String.valueOf(audioInfo.getTO())+":print_format=summary"+options.getStereoChain()+",asplit=4[end][astats][master],atrim=end=1[start];[end]atrim=start="+end+",[start]concat=2:0:1,astats=measure_perchannel=none:measure_overall=RMS_level[null0];[astats]astats=measure_perchannel=none:measure_overall=Noise_floor+Number_of_samples+Peak_level+RMS_level[null1]", "-map", "[master]", "-ar", String.valueOf(sampleRate), "-ab", String.valueOf(export.getBitRate()), "-c:a", export.getCodec(), "-sample_fmt", export.getBitDepth(), "-compression_level", String.valueOf(export.getCompressionLevel()), audioInfo.getSaveFileString(), "-map", "[null0]", "-map", "[null1]", "-f", "null", ""};
 		ffmpeg(true, master);
 	}
 }

@@ -12,7 +12,7 @@ class OptionsDialog {
 
 		// Set dimensions and padding
 		final int W = 285;
-		final int H = 90;
+		final int H = 85;
 		final int PAD = 5;
 
 		// Set up the dialog window
@@ -27,12 +27,12 @@ class OptionsDialog {
 		rnnnCheckbox.addActionListener(e -> {options.rnnn(rnnnCheckbox.isSelected());});
 		jDialog.add(rnnnCheckbox);
 
-		// Output in stereo checkbox
-		JCheckBox stereoCheckbox = new JCheckBox("Output in stereo");
-		stereoCheckbox.setBounds(W/2, PAD, (W/2)-PAD, 25);
-		if (options.getStereo()) {stereoCheckbox.setSelected(true);}
-		stereoCheckbox.addActionListener(e -> {options.setStereo(stereoCheckbox.isSelected());});
-		jDialog.add(stereoCheckbox);
+		// Noise gate checkbox
+		JCheckBox gateCheckbox = new JCheckBox("Noise gate");
+		gateCheckbox.setBounds(W/2, PAD, (W/2)-PAD, 25);
+		if (!options.getGate().isEmpty()) {gateCheckbox.setSelected(true);}
+		gateCheckbox.addActionListener(e -> {options.gate(gateCheckbox.isSelected());});
+		jDialog.add(gateCheckbox);
 
 		// De-click checkbox
 		JCheckBox declickCheckbox = new JCheckBox("De-click");
@@ -41,23 +41,23 @@ class OptionsDialog {
 		declickCheckbox.addActionListener(e -> {options.declick(declickCheckbox.isSelected());});
 		jDialog.add(declickCheckbox);
 
-		// Noise gate checkbox
-		JCheckBox gateCheckbox = new JCheckBox("Noise gate");
-		gateCheckbox.setBounds(W/2, PAD+25, (W/2)-PAD, 25);
-		if (!options.getGate().isEmpty()) {gateCheckbox.setSelected(true);}
-		gateCheckbox.addActionListener(e -> {options.gate(gateCheckbox.isSelected());});
-		jDialog.add(gateCheckbox);
+		// Output in stereo checkbox
+		JCheckBox stereoCheckbox = new JCheckBox("Output in stereo");
+		stereoCheckbox.setBounds(W/2, PAD+25, (W/2)-PAD, 25);
+		if (options.getStereo()) {stereoCheckbox.setSelected(true);}
+		stereoCheckbox.addActionListener(e -> {options.setStereo(stereoCheckbox.isSelected());});
+		jDialog.add(stereoCheckbox);
 
 		// Generate noise checkbox
 		JCheckBox noiseCheckbox = new JCheckBox("Generate noise");
-		noiseCheckbox.setBounds(PAD, (PAD+25)*2, (W/2)-PAD, 25);
+		noiseCheckbox.setBounds(PAD, PAD+25*2, (W/2)-PAD, 25);
 		if (!options.getNoise().isEmpty()) {noiseCheckbox.setSelected(true);}
 		noiseCheckbox.addActionListener(e -> {options.noise(noiseCheckbox.isSelected());});
 		jDialog.add(noiseCheckbox);
 
 		// Suppress warnings checkbox
 		JCheckBox noWarnCheckbox = new JCheckBox("Suppress warnings");
-		noWarnCheckbox.setBounds(W/2, (PAD+25)*2, (W/2)-PAD, 25);
+		noWarnCheckbox.setBounds(W/2, PAD+25*2, (W/2)-PAD, 25);
 		if (options.getNoWarn()) {noWarnCheckbox.setSelected(true);}
 		noWarnCheckbox.addActionListener(e -> {options.setNoWarn(noWarnCheckbox.isSelected());});
 		jDialog.add(noWarnCheckbox);

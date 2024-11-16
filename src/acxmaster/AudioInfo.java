@@ -75,7 +75,7 @@ class AudioInfo {
 	}
 
 	// Constructor for Master mode
-	public AudioInfo(File file, File saveFile, Boolean isSingle) {
+	public AudioInfo(File file, File saveFile, Boolean isSingle, String extension) {
 		if (isSingle) {
 			saveFileString = saveFile.getPath();
 			return;
@@ -92,10 +92,10 @@ class AudioInfo {
 			}
 			base = stringBuilder.toString();
 		} else {base = file.getName();}
-		tmpSaveFile = saveFile.toPath().resolve(base+".mp3").toFile();
+		tmpSaveFile = saveFile.toPath().resolve(base+"."+extension).toFile();
 		for (int i = 2;; i++) {
 			if (!tmpSaveFile.exists()) {break;}
-			tmpSaveFile = saveFile.toPath().resolve(base+" ("+String.valueOf(i)+").mp3").toFile();
+			tmpSaveFile = saveFile.toPath().resolve(base+" ("+String.valueOf(i)+")."+extension).toFile();
 		}
 		saveFileString = tmpSaveFile.getPath();
 	}

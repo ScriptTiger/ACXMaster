@@ -24,6 +24,7 @@ public class Main extends JPanel {
 		final Master master = new Master();
 		final GraphicEQ graphicEQ = master.getGraphicEQ();
 		final Targets targets = master.getTargets();
+		final Export export = master.getExport();
 		final Options options = master.getOptions();
 
 		// Set dimensions and padding
@@ -132,6 +133,24 @@ public class Main extends JPanel {
 					case "tp":
 						try {targets.setTP(Float.parseFloat(tokens[1]));} catch (Exception exception) {}
 						break;
+					case "ar":
+						try {export.setSampleRate(Integer.parseInt(tokens[1]));} catch (Exception exception) {}
+						break;
+					case "ab":
+						try {export.setBitRate(Integer.parseInt(tokens[1]));} catch (Exception exception) {}
+						break;
+					case "codec":
+						export.setCodec(tokens[1]);
+						break;
+					case "sample_fmt":
+						export.setBitDepth(tokens[1]);
+						break;
+					case "compression_level":
+						try {export.setCompressionLevel(Integer.parseInt(tokens[1]));} catch (Exception exception) {}
+						break;
+					case "extension":
+						export.setExtension(tokens[1]);
+						break;
 				}
 			}
 			reader.close();
@@ -159,6 +178,10 @@ public class Main extends JPanel {
 		JMenuItem eqItem = new JMenuItem("Graphic EQ");
 		eqItem.addActionListener(e -> new GraphicEQDialog(jFrame, graphicEQ));
 		settings.add(eqItem);
+
+		// Initialize Export Options menu item
+		JMenuItem exportItem = new JMenuItem("Export Options");
+		settings.add(exportItem);
 
 		// Set up Additional options menu item
 		JMenuItem optionsItem = new JMenuItem("Additional options");
@@ -199,7 +222,13 @@ public class Main extends JPanel {
 					"custom="+options.getCustom()+"\n"+
 					"i="+String.valueOf(targets.getI())+"\n"+
 					"lra="+String.valueOf(targets.getLRA())+"\n"+
-					"tp="+String.valueOf(targets.getTP())
+					"tp="+String.valueOf(targets.getTP())+"\n"+
+					"ar="+String.valueOf(export.getSampleRate())+"\n"+
+					"ab="+String.valueOf(export.getBitRate())+"\n"+
+					"codec="+export.getCodec()+"\n"+
+					"sample_fmt="+export.getBitDepth()+"\n"+
+					"compression_level="+String.valueOf(export.getCompressionLevel())+"\n"+
+					"extension="+export.getExtension()
 				);
 				writer.close();
 			} catch (Exception err) {}
@@ -287,7 +316,7 @@ public class Main extends JPanel {
 			} catch (Exception err) {};
 			String saveButtonText;
 			if (master.isSingle()) {
-				FileNameExtensionFilter fileNameExtensionFilter = new FileNameExtensionFilter("MP3 File", "mp3");
+				FileNameExtensionFilter fileNameExtensionFilter = new FileNameExtensionFilter(export.getExtension()+" file", export.getExtension());
 				saveChooser.addChoosableFileFilter(fileNameExtensionFilter);
 				saveButtonText = "Save as...";				
 			} else {
@@ -298,8 +327,8 @@ public class Main extends JPanel {
 			saveChooser.showDialog(jFrame, saveButtonText);
 			File saveFile = saveChooser.getSelectedFile();
 			if (master.isSingle()) {
-				if (!saveFile.getName().toLowerCase().endsWith(".mp3")) {
-					saveFile = saveFile.getParentFile().toPath().resolve(saveFile.getName()+".mp3").toFile();
+				if (!saveFile.getName().toLowerCase().endsWith("."+export.getExtension())) {
+					saveFile = saveFile.getParentFile().toPath().resolve(saveFile.getName()+"."+export.getExtension()).toFile();
 				}
 			}
 			master.setSaveFile(saveFile);
@@ -319,6 +348,7 @@ public class Main extends JPanel {
 			modeItem.setEnabled(false);
 			targetsItem.setEnabled(false);
 			eqItem.setEnabled(false);
+			exportItem.setEnabled(false);
 			optionsItem.setEnabled(false);
 			new Thread(
 				new Runnable() {
@@ -368,6 +398,7 @@ public class Main extends JPanel {
 						if (mode) {
 							targetsItem.setEnabled(true);
 							eqItem.setEnabled(true);
+							exportItem.setEnabled(true);
 							optionsItem.setEnabled(true);
 						}
 					}
@@ -396,11 +427,21 @@ public class Main extends JPanel {
 		floorTextField.setBackground(Color.WHITE);
 		add(floorTextField);
 
-		// Set up mode menu item
+		// Set up Export Options menu item action listener
+		exportItem.addActionListener(e -> {
+			Boolean reset = new ExportDialog(jFrame, export).getReset();
+			if (reset && master.isSingle()) {
+				saveChooserTextField.setText("");
+				masterButton.setEnabled(false);
+			}
+		});
+
+		// Set up Mode menu item action listener
 		modeItem.addActionListener(e -> {
 			mode = (new ModeDialog(jFrame, mode)).getMode();
 			targetsItem.setEnabled(mode);
 			eqItem.setEnabled(mode);
+			exportItem.setEnabled(mode);
 			optionsItem.setEnabled(mode);
 			saveButton.setVisible(mode);
 			saveChooserTextField.setVisible(mode);

@@ -11,11 +11,12 @@ import java.io.*;
 
 // Check class
 class Check {
-	public static Boolean skip = false;
+	public static Boolean skip;
 	public Boolean getSkip() {return skip;}
 	private void setSkip() {skip = true;}
 
 	public Check(AudioInfo audioInfo, Boolean mode, String file, Boolean isSameLayout) {
+		skip = false;
 		float otp;
 		double duration;
 		if (mode) {
@@ -93,6 +94,5 @@ class Check {
 				int choice = JOptionPane.showConfirmDialog(null, warnings, "Warning", JOptionPane.DEFAULT_OPTION, JOptionPane.WARNING_MESSAGE);
 			}
 		}
-
 	}
 }

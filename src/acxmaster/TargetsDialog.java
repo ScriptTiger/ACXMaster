@@ -6,7 +6,7 @@ import java.awt.event.*;
 import javax.swing.*;
 import javax.swing.event.*;
 
-// Targets controllers class
+// Targets controller class
 class TargetsDialog {
 	public TargetsDialog(JFrame jFrame, Targets targets) {
 
