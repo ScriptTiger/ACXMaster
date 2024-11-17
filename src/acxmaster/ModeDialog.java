@@ -8,19 +8,12 @@ import javax.swing.event.*;
 
 // Mode controller class
 class ModeDialog {
-	private static Boolean mode;
-	public Boolean getMode() {return mode;}
-	private void setMode(Boolean mode) {this.mode = mode;}
-
-	public ModeDialog(JFrame jFrame, Boolean mode) {
+	public ModeDialog(JFrame jFrame, Mode mode) {
 
 		// Set dimensions and padding
 		final int W = 200;
 		final int H = 35;
 		final int PAD = 5;
-
-		// Initialize mode
-		setMode(mode);
 
 		// Set up the dialog window
 		JDialog jDialog = new JDialog(jFrame, "Mode", true);
@@ -28,22 +21,22 @@ class ModeDialog {
 		jDialog.getContentPane().setLayout(null);
 
 		// Initalize toggles
-		JToggleButton checkToggle = new JToggleButton("Check", !getMode());
-		JToggleButton masterToggle = new JToggleButton("Master", getMode());
+		JToggleButton checkToggle = new JToggleButton("Check", !mode.getMode());
+		JToggleButton masterToggle = new JToggleButton("Master", mode.getMode());
 
 		// Set up check mode toggle
 		checkToggle.setBounds(PAD, PAD, (W/2)-PAD, 25);
 		checkToggle.addActionListener(e -> {
-			setMode(!checkToggle.isSelected());
-			masterToggle.setSelected(getMode());
+			mode.setMode(!checkToggle.isSelected());
+			masterToggle.setSelected(mode.getMode());
 		});
 		jDialog.add(checkToggle);
 
 		// Set up master mode toggle
 		masterToggle.setBounds(W/2, PAD, (W/2)-PAD, 25);
 		masterToggle.addActionListener(e -> {
-			setMode(masterToggle.isSelected());
-			checkToggle.setSelected(!getMode());
+			mode.setMode(masterToggle.isSelected());
+			checkToggle.setSelected(!mode.getMode());
 		});
 		jDialog.add(masterToggle);
 
