@@ -8,7 +8,7 @@ class Export {
 	//////////////////
 
 	private static int sampleRate = 44100;
-	private static int bitRate = 192000;
+	private static int bitRate = 320000;
 	private static String codec = "mp3";
 	private static String bitDepth = "fltp";
 	private static int compressionLevel = 0;

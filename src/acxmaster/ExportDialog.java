@@ -123,7 +123,7 @@ class ExportDialog {
 			}
 			switch (encodingComboBox.getSelectedIndex()) {
 				case 0:
-					export.setBitRate(192000);
+					export.setBitRate(320000);
 					export.setCodec("mp3");
 					export.setBitDepth("fltp");
 					export.setCompressionLevel(0);
