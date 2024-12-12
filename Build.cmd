@@ -34,6 +34,18 @@ cd ..\..
 
 if %DEV% == 1 goto Exit
 
+echo Build Java %JV% package...
+set PLATFORM=Java_%JV%
+md "Release\%JV%\%PROJECT%_%PLATFORM%"
+md "Release\%JV%\%PROJECT%_%PLATFORM%\legal"
+(
+	copy "Release\%JV%\%PROJECT%.jar" "Release\%JV%\%PROJECT%_%PLATFORM%"
+	copy README.md "Release\%JV%\%PROJECT%_%PLATFORM%"
+	copy LICENSE "Release\%JV%\%PROJECT%_%PLATFORM%"
+	copy bin\std.rnnn "Release\%JV%\%PROJECT%_%PLATFORM%"
+	xcopy docs\rnnoise /s "Release\%JV%\%PROJECT%_%PLATFORM%\legal\rennoise\"
+) > nul
+
 echo Set Java version to build...
 set JV=21
 
@@ -80,20 +92,6 @@ jlink.exe -p "Release\%JV%\%PROJECT%.jar;%JAVA_HOME%\jmods\linux" --add-modules 
 echo Build launcher for Linux...
 set GOOS=linux
 go build -ldflags="-s -w" -o "Release\%JV%\%PROJECT%_%PLATFORM%\%CNAME%" src\%PACKAGE%.go src\include_other.go
-
-echo Build app image for Mac...
-set PLATFORM=Mac_amd64
-jlink.exe -p "Release\%JV%\%PROJECT%.jar;%JAVA_HOME%\jmods\mac" --add-modules %DEPS%,%PACKAGE% --compress=zip-9 --no-header-files --no-man-pages --strip-debug --output "Release\%JV%\%PROJECT%_%PLATFORM%"
-(
-	copy README.md "Release\%JV%\%PROJECT%_%PLATFORM%"
-	copy LICENSE "Release\%JV%\%PROJECT%_%PLATFORM%"
-	copy bin\std.rnnn "Release\%JV%\%PROJECT%_%PLATFORM%\bin"
-	xcopy docs\rnnoise /s "Release\%JV%\%PROJECT%_%PLATFORM%\legal\rennoise\"
-) > nul
-
-echo Build launcher for Mac...
-set GOOS=darwin
-go build -ldflags="-s -w" -o "Release\%JV%\%PROJECT%_%PLATFORM%\%CNAME%.app" src\%PACKAGE%.go src\include_other.go
 
 :Exit
 

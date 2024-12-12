@@ -9,7 +9,7 @@ class Targets {
 
 	private static float i = -20;
 	private static float lra = 7;
-	private static float tp = -3;
+	private static float tp = (float)-3.1;
 
 	//////////
 	// Getters

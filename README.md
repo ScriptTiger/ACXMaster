@@ -19,6 +19,8 @@ Features:
 **Download the precompiled executables for your target operating system to get started (only 64-bit platforms currently supported):**  
 https://github.com/ScriptTiger/ACXMaster/releases
 
+NOTE: It should be preferable to use the package compiled for your specific operating system, as it will be more optimized for your particular operating system and also be packaged with the latest LTS version of Java (OpenJDK), Java 21 as of writing this. However, if you do decide to use the Java 8 release, such as if you are a Mac user and don't have a package specifically for your operating system, you will need to make sure you have installed both [Java 8](https://www.java.com/download/) and FFmpeg. For Mac users, please refer to [FFmpeg's official documentation on how to install FFmpeg on Mac](https://trac.ffmpeg.org/wiki/CompilationGuide/macOS).
+
 # More About ScriptTiger
 
 For more ScriptTiger scripts and goodies, check out ScriptTiger's GitHub Pages website:  

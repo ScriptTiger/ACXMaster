@@ -56,7 +56,7 @@ class TargetsDialog {
 		defaults.addActionListener(e -> {
 			iTextField.setText("-20.0");
 			lraTextField.setText("7.0");
-			tpTextField.setText("-3.0");
+			tpTextField.setText("-3.1");
 		});
 		jDialog.add(defaults);
 

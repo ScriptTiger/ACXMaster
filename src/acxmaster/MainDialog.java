@@ -32,15 +32,16 @@ public class MainDialog extends JPanel {
 		final int H = 270;
 		final int PAD = 5;
 
-		// Store current look and feel
+		// Store look and feels
 		LookAndFeel lookAndFeel = UIManager.getLookAndFeel();
+		String systemLookAndFeel = UIManager.getSystemLookAndFeelClassName();
 
 		// JPanel properties
 		setPreferredSize(new Dimension(W, H));
 		setLayout(null);
 
 		// Read and load settings from acxmaster.conf file if it exists
-		new Settings(false, mode, graphicEQ, options, targets, export);
+		new Settings(false, mode, master, graphicEQ, options, targets, export);
 
 		// Set up menu bar
 		JMenuBar jMenuBar = new JMenuBar();
@@ -59,6 +60,20 @@ public class MainDialog extends JPanel {
 			if (!previousMode.equals(mode.getMode())) {mode.paintMode();}
 		});
 		settings.add(modeItem);
+
+		// Set up FFmpeg menu item
+		JMenuItem ffmpegItem = new JMenuItem("FFmpeg");
+		ffmpegItem.addActionListener(e -> {
+			JFileChooser ffmpegChooser = null;
+			try {
+				UIManager.setLookAndFeel(systemLookAndFeel);
+				ffmpegChooser = new JFileChooser();
+				UIManager.setLookAndFeel(lookAndFeel);
+			} catch (Exception err) {};
+			ffmpegChooser.showDialog(jFrame, "Choose FFmpeg executable...");
+			master.setFFmpegPath(ffmpegChooser.getSelectedFile().getPath());
+		});
+		settings.add(ffmpegItem);
 
 		// Set up Targets menu item
 		JMenuItem targetsItem = new JMenuItem("Targets");
@@ -81,7 +96,7 @@ public class MainDialog extends JPanel {
 
 		// Set up Save Settings menu item
 		JMenuItem saveSettingsItem = new JMenuItem("Save Settings");
-		saveSettingsItem.addActionListener(e -> new Settings(true, mode, graphicEQ, options, targets, export));
+		saveSettingsItem.addActionListener(e -> new Settings(true, mode, master, graphicEQ, options, targets, export));
 		settings.add(saveSettingsItem);
 
 		// Initialize buttons and text fields
@@ -119,7 +134,7 @@ public class MainDialog extends JPanel {
 		chooseButton.addActionListener(e -> {
 			JFileChooser fileChooser = null;
 			try {
-				UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+				UIManager.setLookAndFeel(systemLookAndFeel);
 				fileChooser = new JFileChooser();
 				UIManager.setLookAndFeel(lookAndFeel);
 			} catch (Exception err) {};
@@ -159,7 +174,7 @@ public class MainDialog extends JPanel {
 		saveButton.addActionListener(e -> {
 			JFileChooser saveChooser = null;
 			try {
-				UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+				UIManager.setLookAndFeel(systemLookAndFeel);
 				saveChooser = new JFileChooser();
 				UIManager.setLookAndFeel(lookAndFeel);
 			} catch (Exception err) {};
@@ -195,6 +210,7 @@ public class MainDialog extends JPanel {
 			chooseButton.setEnabled(false);
 			saveButton.setEnabled(false);
 			modeItem.setEnabled(false);
+			ffmpegItem.setEnabled(false);
 			targetsItem.setEnabled(false);
 			eqItem.setEnabled(false);
 			exportItem.setEnabled(false);
@@ -238,12 +254,13 @@ public class MainDialog extends JPanel {
 							}
 							if (mode.getMode()) {masterButton.setText("Mastering complete!");
 							} else {masterButton.setText("Checking complete!");}
-						} else {masterButton.setText("Ensure FFmpeg is installed in your path!");}
+						} else {masterButton.setText("Ensure the path to FFmpeg is set correctly!");}
 						fileChooserTextField.setText("");
 						saveChooserTextField.setText("");
 						saveButton.setText("Save...");
 						chooseButton.setEnabled(true);
 						modeItem.setEnabled(true);
+						ffmpegItem.setEnabled(true);
 						if (mode.getMode()) {
 							targetsItem.setEnabled(true);
 							eqItem.setEnabled(true);

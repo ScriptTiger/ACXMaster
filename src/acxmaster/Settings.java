@@ -5,12 +5,13 @@ import java.io.*;
 
 // Settings class
 class Settings {
-	public Settings(Boolean save, Mode mode, GraphicEQ graphicEQ, Options options, Targets targets, Export export) {
+	public Settings(Boolean save, Mode mode, Master master, GraphicEQ graphicEQ, Options options, Targets targets, Export export) {
 		try {
 			if (save) {
 				FileWriter writer = new FileWriter("acxmaster.conf");
 				writer.write(
 					"mode="+String.valueOf(mode.getMode())+"\n"+
+					"ffmpeg="+master.getFFmpegPath()+"\n"+
 					"1b="+graphicEQ.getOneBand()+"\n"+
 					"2b="+graphicEQ.getTwoBand()+"\n"+
 					"3b="+graphicEQ.getThreeBand()+"\n"+
@@ -55,6 +56,9 @@ class Settings {
 					switch (tokens[0].toLowerCase()) {
 						case "mode":
 							try {mode.setMode(Boolean.parseBoolean(tokens[1]));} catch (Exception exception) {}
+							break;
+						case "ffmpeg":
+							master.setFFmpegPath(tokens[1]);
 							break;
 						case "1b":
 							graphicEQ.setOneBand(tokens[1]);
