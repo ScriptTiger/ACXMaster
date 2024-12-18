@@ -136,7 +136,7 @@ class Master {
 						String[] roughDurationParsed = audioInfo.getRoughDurationString().split(":");
 						try {audioInfo.setRoughDuration((Float.parseFloat(roughDurationParsed[0])*3600)+(Float.parseFloat(roughDurationParsed[1])*60)+Float.parseFloat(roughDurationParsed[2]));} catch (Exception exception) {}
 					}
-					if (getStreamInfo && line.matches("^\\s+Stream\\s#\\d+:\\d+:\\sAudio:.+")) {
+					if (getStreamInfo && line.matches("^\\s+Stream\\s#\\d+:\\d+.*:\\sAudio:.+")) {
 						String[] elements = line.split(",");
 						audioInfo.setCodec(elements[0].split(":")[3].split(" ")[1].trim());
 						try {audioInfo.setSampleRate(Integer.parseInt(elements[1].split(" ")[1]));} catch (Exception exception) {}
