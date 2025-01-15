@@ -25,5 +25,3 @@ NOTE: It should be preferable to use the package compiled for your specific oper
 
 For more ScriptTiger scripts and goodies, check out ScriptTiger's GitHub Pages website:  
 https://scripttiger.github.io/
-
-[![Donate](https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=MZ4FH4G5XHGZ4)
