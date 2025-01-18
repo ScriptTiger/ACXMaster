@@ -1,5 +1,8 @@
 package acxmaster;
 
+// I/O and buffered I/O deps
+import java.io.*;
+
 // Export class
 class Export {
 
@@ -13,6 +16,7 @@ class Export {
 	private static String bitDepth = "fltp";
 	private static int compressionLevel = 0;
 	private static String extension = "mp3";
+	private static String currentDirectory = "";
 
 	//////////
 	// Getters
@@ -24,6 +28,7 @@ class Export {
 	public String getBitDepth() {return bitDepth;}
 	public int getCompressionLevel() {return compressionLevel;}
 	public String getExtension() {return extension;}
+	public String getCurrentDirectory() {return currentDirectory;}
 
 	//////////
 	// Setters
@@ -35,4 +40,5 @@ class Export {
 	public void setBitDepth(String bitDepth) {this.bitDepth = bitDepth;}
 	public void setCompressionLevel(int compressionLevel) {this.compressionLevel = compressionLevel;}
 	public void setExtension(String extension) {this.extension = extension;}
+	public void setCurrentDirectory(String currentDirectory) {this.currentDirectory = currentDirectory;}
 }

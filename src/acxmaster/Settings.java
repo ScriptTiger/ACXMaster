@@ -45,7 +45,8 @@ class Settings {
 					"codec="+export.getCodec()+"\n"+
 					"sample_fmt="+export.getBitDepth()+"\n"+
 					"compression_level="+String.valueOf(export.getCompressionLevel())+"\n"+
-					"extension="+export.getExtension()
+					"extension="+export.getExtension()+"\n"+
+					"directory="+export.getCurrentDirectory()
 				);
 				writer.close();
 			} else {
@@ -161,6 +162,9 @@ class Settings {
 							break;
 						case "extension":
 							export.setExtension(tokens[1]);
+							break;
+						case "directory":
+							export.setCurrentDirectory(tokens[1]);
 							break;
 					}
 				}

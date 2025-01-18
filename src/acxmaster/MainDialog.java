@@ -187,6 +187,7 @@ public class MainDialog extends JPanel {
 				saveChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 				saveButtonText = "Save to...";
 			}
+			if (!export.getCurrentDirectory().isEmpty()) {saveChooser.setCurrentDirectory(new File(export.getCurrentDirectory()));}
 			saveChooser.setAcceptAllFileFilterUsed(false);
 			saveChooser.showDialog(jFrame, saveButtonText);
 			File saveFile = saveChooser.getSelectedFile();
@@ -194,7 +195,8 @@ public class MainDialog extends JPanel {
 				if (!saveFile.getName().toLowerCase().endsWith("."+export.getExtension())) {
 					saveFile = saveFile.getParentFile().toPath().resolve(saveFile.getName()+"."+export.getExtension()).toFile();
 				}
-			}
+				export.setCurrentDirectory(saveFile.getParentFile().getPath());
+			} else {export.setCurrentDirectory(saveFile.getPath());}
 			master.setSaveFile(saveFile);
 			saveChooserTextField.setText(saveFile.getPath());
 			masterButton.setEnabled(true);
