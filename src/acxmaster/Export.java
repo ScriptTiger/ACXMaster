@@ -1,8 +1,5 @@
 package acxmaster;
 
-// I/O and buffered I/O deps
-import java.io.*;
-
 // Export class
 class Export {
 
