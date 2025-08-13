@@ -15,6 +15,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 // Main controller class
 public class MainDialog extends JPanel {
 	private static JFrame jFrame;
+	private String lastOpenDirectory = getLastDirPath();
 
 	// Main controller constructor
 	public MainDialog() {
@@ -130,38 +131,50 @@ public class MainDialog extends JPanel {
 		fileChooserTextField.setBackground(Color.WHITE);
 		add(fileChooserTextField);
 
-		// Set up file chooser
-		chooseButton.addActionListener(e -> {
-			JFileChooser fileChooser = null;
-			try {
-				UIManager.setLookAndFeel(systemLookAndFeel);
-				fileChooser = new JFileChooser();
-				UIManager.setLookAndFeel(lookAndFeel);
-			} catch (Exception err) {};
-			fileChooser.setMultiSelectionEnabled(true);
-			fileChooser.showDialog(jFrame, "Choose audio files...");
-			master.setFiles(fileChooser.getSelectedFiles());
-			int fileCount = master.getFileCount();
-			if (fileCount == 0) {return;}
-			if (fileCount == 1) {
-				fileChooserTextField.setText(master.getFiles()[0].getPath());
-				saveButton.setText("Save as...");
-				master.setIsSingle(true);
-			} else {
-				fileChooserTextField.setText(String.valueOf(fileCount)+" files selected");
-				saveButton.setText("Save to...");
-				master.setIsSingle(false);
-			}
-			saveButton.setEnabled(true);
-			master.setSaveFile(null);
-			saveChooserTextField.setText("");
-			if (mode.getMode()) {
-				masterButton.setEnabled(false);
-			} else {
-				masterButton.setText("Check!");
-				masterButton.setEnabled(true);
-			}
-		});
+    // Set up file chooser
+    chooseButton.addActionListener(e -> {
+          try {
+            UIManager.setLookAndFeel(systemLookAndFeel);
+            JFileChooser fileChooser = new JFileChooser();
+            if (!lastOpenDirectory.isEmpty()) {
+              fileChooser.setCurrentDirectory(new File(lastOpenDirectory));
+            }
+            fileChooser.setMultiSelectionEnabled(true);
+            UIManager.setLookAndFeel(lookAndFeel);
+
+            int result = fileChooser.showDialog(jFrame, "Choose audio files...");
+            if (result == JFileChooser.APPROVE_OPTION) {
+              File[] selectedFiles = fileChooser.getSelectedFiles();
+              if (selectedFiles != null && selectedFiles.length > 0) {
+                master.setFiles(selectedFiles);
+                lastOpenDirectory = selectedFiles[0].getParent();
+                saveLastDirPath(lastOpenDirectory);
+
+                int fileCount = selectedFiles.length;
+                if (fileCount == 1) {
+                  fileChooserTextField.setText(selectedFiles[0].getPath());
+                  saveButton.setText("Save as...");
+                  master.setIsSingle(true);
+                } else {
+                  fileChooserTextField.setText(fileCount + " files selected");
+                  saveButton.setText("Save to...");
+                  master.setIsSingle(false);
+                }
+                saveButton.setEnabled(true);
+                master.setSaveFile(null);
+                saveChooserTextField.setText("");
+                if (mode.getMode()) {
+                  masterButton.setEnabled(false);
+                } else {
+                  masterButton.setText("Check!");
+                  masterButton.setEnabled(true);
+                }
+              }
+            }
+          } catch (Exception err) {
+            // Handle exception if needed
+          }
+        });
 		add(chooseButton);
 
 		// Set up save chooser text field
@@ -316,5 +329,22 @@ public class MainDialog extends JPanel {
 			fileChooserTextField
 		);
 		mode.paintMode();
+	}
+
+	private String getLastDirPath() {
+		File file = new File(System.getProperty("user.home"), ".acxMasterConfig.txt");
+		if (file.exists()) {
+			try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+				return reader.readLine();
+			} catch (IOException e) {}
+		}
+		return "";
+	}
+
+	private void saveLastDirPath(String path) {
+		File file = new File(System.getProperty("user.home"), ".acxMasterConfig.txt");
+		try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
+			writer.write(path);
+		} catch (IOException e) {}
 	}
 }
