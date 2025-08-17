@@ -46,7 +46,8 @@ class Settings {
 					"sample_fmt="+export.getBitDepth()+"\n"+
 					"compression_level="+String.valueOf(export.getCompressionLevel())+"\n"+
 					"extension="+export.getExtension()+"\n"+
-					"directory="+export.getCurrentDirectory()
+					"directory="+export.getCurrentDirectory()+"\n"+
+					"source="+options.getSourceDirectory()
 				);
 				writer.close();
 			} else {
@@ -165,6 +166,9 @@ class Settings {
 							break;
 						case "directory":
 							export.setCurrentDirectory(tokens[1]);
+							break;
+						case "source":
+							options.setSourceDirectory(tokens[1]);
 							break;
 					}
 				}

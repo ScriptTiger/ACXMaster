@@ -139,18 +139,22 @@ public class MainDialog extends JPanel {
 				UIManager.setLookAndFeel(lookAndFeel);
 			} catch (Exception err) {};
 			fileChooser.setMultiSelectionEnabled(true);
+			if (!options.getSourceDirectory().isEmpty()) {fileChooser.setCurrentDirectory(new File(options.getSourceDirectory()));}
 			fileChooser.showDialog(jFrame, "Choose audio files...");
-			master.setFiles(fileChooser.getSelectedFiles());
+			File[] sourceFile = fileChooser.getSelectedFiles();
+			master.setFiles(sourceFile);
 			int fileCount = master.getFileCount();
 			if (fileCount == 0) {return;}
 			if (fileCount == 1) {
-				fileChooserTextField.setText(master.getFiles()[0].getPath());
+				fileChooserTextField.setText(sourceFile[0].getPath());
 				saveButton.setText("Save as...");
 				master.setIsSingle(true);
+				options.setSourceDirectory(sourceFile[0].getParentFile().getPath());
 			} else {
 				fileChooserTextField.setText(String.valueOf(fileCount)+" files selected");
 				saveButton.setText("Save to...");
 				master.setIsSingle(false);
+				options.setSourceDirectory(sourceFile[0].getParentFile().getPath());
 			}
 			saveButton.setEnabled(true);
 			master.setSaveFile(null);

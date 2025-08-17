@@ -14,6 +14,7 @@ class Options {
 	private static String noise = "";
 	private static Boolean noWarn = false;
 	private static String custom = "";
+	private static String sourceDirectory = "";
 
 	//////////
 	// Getters
@@ -26,6 +27,7 @@ class Options {
 	public String getNoise() {return noise;}
 	public Boolean getNoWarn() {return noWarn;}
 	public String getCustom() {return custom;}
+	public String getSourceDirectory() {return sourceDirectory;}
 	public String getChain() {return rnnn+gate+custom+declick;}
 	public String getNoiseChain() {
 		if (!noise.isEmpty()) {
@@ -64,4 +66,5 @@ class Options {
 	public void setNoise(String noise) {this.noise = noise;}
 	public void setNoWarn(Boolean enabled) {noWarn = enabled;}
 	public void setCustom(String custom) {this.custom = custom;}
+	public void setSourceDirectory(String sourceDirectory) {this.sourceDirectory = sourceDirectory;}
 }
