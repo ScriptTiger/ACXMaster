@@ -47,7 +47,7 @@ md "Release\%JV%\%PROJECT%_%PLATFORM%\legal"
 ) > nul
 
 echo Set Java version to build...
-set JV=21
+set JV=25
 
 echo Compile module source files...
 javac.exe --add-modules %DEPS% -d Release\%JV% src\%PACKAGE%\*.java --release %JV%
@@ -76,8 +76,10 @@ jlink.exe -p "Release\%JV%\%PROJECT%.jar;%JAVA_HOME%\jmods\windows" --add-module
 ) > nul
 
 echo Build launcher for Windows...
+cd src
 set GOOS=windows
-go build -ldflags="-s -w -H=windowsgui" -o "Release\%JV%\%PROJECT%_%PLATFORM%\%CNAME%.exe" src\%PACKAGE%.go src\include_windows.go
+go build -ldflags="-s -w -H=windowsgui" -o "..\Release\%JV%\%PROJECT%_%PLATFORM%\%CNAME%.exe"
+cd ..
 
 echo Build app image for Linux...
 set PLATFORM=Linux_amd64
@@ -90,8 +92,10 @@ jlink.exe -p "Release\%JV%\%PROJECT%.jar;%JAVA_HOME%\jmods\linux" --add-modules 
 ) > nul
 
 echo Build launcher for Linux...
+cd src
 set GOOS=linux
-go build -ldflags="-s -w" -o "Release\%JV%\%PROJECT%_%PLATFORM%\%CNAME%" src\%PACKAGE%.go src\include_other.go
+go build -ldflags="-s -w" -o "..\Release\%JV%\%PROJECT%_%PLATFORM%\%CNAME%"
+cd ..
 
 :Exit
 

@@ -16,7 +16,7 @@ func main() {
 	dir = filepath.Join(filepath.Dir(dir), "bin")
 
 	// Launch app
-	command := exec.Command(filepath.Join(dir, javaName), "-m", "acxmaster/acxmaster.Main")
+	command := exec.Command(filepath.Join(dir, JAVANAME), "-m", "acxmaster/acxmaster.Main")
 	command.Dir = dir
 	command.Start()
 

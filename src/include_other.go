@@ -1,4 +1,6 @@
+//go:build !windows
+
 package main
 
 // Set name of Java executable
-const javaName = "java"
+const JAVANAME = "java"
